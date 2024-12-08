@@ -24,12 +24,15 @@ jobs:
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip setuptools
-          pip install cmake pybind11 numpy tox
+          DEPENDENCIES=$(python -c 'from setuptools.config.setupcfg import read_configuration as c; a = c("setup.cfg"); print(" ".join(a["options"]["install_requires"][1:]))')
+          pip install ${DEPENDENCIES}
+          DOCDEPENDENCIES=$(python -c 'with open("docs/requirements.txt") as a: available = list(a); print(" ".join(map(lambda x : x.strip(), filter(lambda x : not x.startswith("#"), available))))')
+          pip install ${DOCDEPENDENCIES}
 
       - name: Build docs
         run: |
           python setup.py build_ext --inplace
-          cp build/lib*/rds2py/lib_rds_parser* src/rds2py/
+          cp build/lib*/_core* src/singler/
           tox -e docs
           touch ./docs/_build/html/.nojekyll
 
