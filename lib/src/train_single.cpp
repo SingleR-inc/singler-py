@@ -15,14 +15,13 @@ TrainedSingleIntersectPointer train_single(
     const pybind11::array& ref_features,
     const pybind11::array& labels,
     const pybind11::list& markers,
-    const std::shared_ptr<knncolle::Builder<knncolle::SimpleMatrix<uint32_t, uint32_t, double>, double> >& builder,
+    const BuilderPointer& builder,
     int nthreads)
 {
     singlepp::TrainSingleOptions<uint32_t, double> opts;
     opts.num_threads = nthreads;
-    opts.top = -1; // Use all available markers; assume subsetting was applied on the R side.
-
-    opts.trainer = builder; // std::shared_ptr<BiocNeighbors::Builder>(std::shared_ptr<BiocNeighbors::Builder>{}, bptr.get()); // make a no-op shared pointer.
+    opts.top = -1; // Use all available markers; assume subsetting was applied on the Python side.
+    opts.trainer = BuilderPointer(BuilderPointer{}, builder.get()); // make a no-op shared pointer.
 
     auto NR = ref->nrow();
     auto NC = ref->ncol();
@@ -30,7 +29,7 @@ TrainedSingleIntersectPointer train_single(
         throw std::runtime_error("length of 'labels' is equal to the number of columns of 'ref'");
     }
 
-    // Setting up the markers. We assume that these are already 0-indexed on the R side.
+    // Setting up the markers.
     size_t ngroups = markers.size();
     singlepp::Markers<MatrixIndex> markers2(ngroups);
     for (size_t m = 0; m < ngroups; ++m) {
@@ -72,12 +71,22 @@ TrainedSingleIntersectPointer train_single(
     return TrainedSingleIntersectPointer(new decltype(built)(std::move(built)));
 }
 
-pybind11::array_t<MatrixIndex> get_ref_subset(const TrainedSingleIntersectPointer& ptr) {
+pybind11::array_t<MatrixIndex> get_markers_from_single_reference(const TrainedSingleIntersectPointer& ptr) {
     const auto& rsub = ptr->get_ref_subset();
     return pybind11::array_t<MatrixIndex>(rsub.size(), rsub.data());
 }
 
+uint32_t get_num_markers_from_single_reference(const TrainedSingleIntersectPointer& ptr) {
+    return ptr->get_ref_subset().size();
+}
+
+uint32_t get_num_labels_from_single_reference(const TrainedSingleIntersectPointer& ptr) {
+    return ptr->num_labels();
+}
+
 void init_train_single(pybind11::module& m) {
     m.def("train_single", &train_single);
-    m.def("get_ref_subset", &get_ref_subset);
+    m.def("get_markers_from_single_reference", &get_markers_from_single_reference);
+    m.def("get_num_markers_from_single_reference", &get_num_markers_from_single_reference);
+    m.def("get_num_labels_from_single_reference", &get_num_labels_from_single_reference);
 }

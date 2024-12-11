@@ -91,7 +91,7 @@ def _clean_matrix(x, features, assay_type, check_missing, num_threads):
             "number of rows of 'x' should be equal to the length of 'features'"
         )
 
-    ptr = tatamize(x)
+    ptr = mattress.initialize(x)
     if not check_missing:
         return ptr, features
 

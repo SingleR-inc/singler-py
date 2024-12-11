@@ -1,14 +1,14 @@
 from typing import Any, Literal, Optional, Sequence, Union
 
-import biocutils as ut
-from numpy import array, int32, ndarray
+import biocutils
+import numpy
 
-from ._Markers import _Markers
-from ._utils import _clean_matrix, _factorize, _restrict_features
-from .get_classic_markers import _get_classic_markers_raw
+from . import lib_singler as lib
+from ._utils import _clean_matrix, _factorize
+from .get_classic_markers import _get_classic_markers_raw, _markers_to_dict
 
 
-class SinglePrebuiltReference:
+class TrainedSingleReference:
     """A prebuilt reference object, typically created by
     :py:meth:`~singler.build_single_reference.build_single_reference`. This is intended for advanced users only and
     should not be serialized.
@@ -26,49 +26,37 @@ class SinglePrebuiltReference:
         self._labels = labels
         self._markers = markers
 
-    def __del__(self):
-        lib.free_single_reference(self._ptr)
-
     def num_markers(self) -> int:
         """
         Returns:
             Number of markers to be used for classification. This is the
             same as the size of the array from :py:meth:`~marker_subset`.
         """
-        return lib.get_nsubset_from_single_reference(self._ptr)
+        return lib.get_num_markers_from_single_reference(self._ptr)
 
     def num_labels(self) -> int:
         """
         Returns:
             Number of unique labels in this reference.
         """
-        return lib.get_nlabels_from_single_reference(self._ptr)
+        return lib.get_num_labels_from_single_reference(self._ptr)
 
     @property
-    def features(self) -> Sequence:
-        """
-        Returns:
-            The universe of features known to this reference, usually as strings.
-        """
+    def features(self) -> list:
+        """The universe of features known to this reference."""
         return self._features
 
     @property
     def labels(self) -> Sequence:
-        """
-        Returns:
-            Unique labels in this reference.
-        """
+        """Unique labels in this reference."""
         return self._labels
 
     @property
-    def markers(self) -> dict[Any, dict[Any, Sequence]]:
-        """
-        Returns:
-            Markers for every pairwise comparison between labels.
-        """
+    def markers(self) -> dict[Any, dict[Any, list]]:
+        """Markers for every pairwise comparison between labels."""
         return self._markers
 
-    def marker_subset(self, indices_only: bool = False) -> Union[ndarray, list]:
+    def marker_subset(self, indices_only: bool = False) -> Union[numpy.ndarray, list]:
         """
         Args:
             indices_only:
@@ -81,28 +69,48 @@ class SinglePrebuiltReference:
             If ``indices_only = True``, a NumPy array containing the integer indices of
             features in ``features`` that were chosen as markers.
         """
-        nmarkers = self.num_markers()
-        buffer = ndarray(nmarkers, dtype=int32)
-        lib.get_subset_from_single_reference(self._ptr, buffer)
+        buffer = lib.get_markers_from_single_reference(self._ptr)
         if indices_only:
             return buffer
         else:
             return [self._features[i] for i in buffer]
 
 
-def build_single_reference(
+def _markers_from_dict(markers: dict[Any, dict[Any, Sequence]], labels: Sequence, features: Sequence):
+    fmapping = {}
+    for i, x in enumerate(features):
+        fmapping[x] = i
+
+    outer_instance = [None] * len(labels)
+    for outer_i, outer_k in enumerate(labels):
+        inner_instance = [None] * len(labels)
+
+        for inner_i, inner_k in enumerate(labels):
+            current = markers[outer_k][inner_k]
+            mapped = []
+            for x in current:
+                if x in fmapping:  # just skipping features that aren't present.
+                    mapped.append(fmapping[x])
+            inner_instance[inner_i] = numpy.array(mapped, dtype=numpy.uint32)
+
+        outer_instance[outer_i] = inner_instance
+
+    return outer_instance
+
+
+def train_single(
     ref_data: Any,
     ref_labels: Sequence,
     ref_features: Sequence,
+    test_features: Optional[Sequence] = None,
     assay_type: Union[str, int] = "logcounts",
     check_missing: bool = True,
-    restrict_to: Optional[Union[set, dict]] = None,
     markers: Optional[dict[Any, dict[Any, Sequence]]] = None,
     marker_method: Literal["classic"] = "classic",
     marker_args: dict = {},
     approximate: bool = True,
     num_threads: int = 1,
-) -> SinglePrebuiltReference:
+    ) -> TrainedSingleReference:
     """Build a single reference dataset in preparation for classification.
 
     Args:
@@ -118,13 +126,14 @@ def build_single_reference(
             :py:class:`~summarizedexperiment.SummarizedExperiment.SummarizedExperiment`
             containing such a matrix in one of its assays.
 
-        labels:
-            Sequence of labels for each reference profile,
-            i.e., column in ``ref``.
+        ref_labels:
+            Sequence of labels for each reference profile, i.e., column in ``ref_data``.
 
-        features:
-            Sequence of identifiers for each feature,
-            i.e., row in ``ref``.
+        ref_features:
+            Sequence of identifiers for each feature, i.e., row in ``ref_data``.
+
+        test_features:
+            Sequence of identifiers for each feature in the test dataset.
 
         assay_type:
             Assay containing the expression matrix,
@@ -134,11 +143,6 @@ def build_single_reference(
         check_missing:
             Whether to check for and remove rows with missing (NaN) values
             from ``ref_data``.
-
-        restrict_to:
-            Subset of available features to restrict to. Only features in
-            ``restrict_to`` will be used in the reference building. If None,
-            no restriction is performed.
 
         markers:
             Upregulated markers for each pairwise comparison between labels.
@@ -166,7 +170,7 @@ def build_single_reference(
 
     Returns:
         The pre-built reference, ready for use in downstream methods like
-        :py:meth:`~singler.classify_single_reference.classify_single_reference`.
+        :py:meth:`~singler.classify_single_reference.classify_single`.
     """
 
     ref_ptr, ref_features = _clean_matrix(
@@ -188,22 +192,22 @@ def build_single_reference(
                 num_threads=num_threads,
                 **marker_args,
             )
-            markers = mrk.to_dict(lablev, ref_features)
-            labind = array(ut.match(ref_labels, lablev), dtype=int32)
+            markers = _markers_to_dict(mrk, lablev, ref_features)
+            labind = numpy.array(biocutils.match(ref_labels, lablev), dtype=numpy.uint32)
         else:
-            raise NotImplementedError("other marker methods are not implemented, sorry")
+            raise NotImplementedError("other marker methods are not yet implemented, sorry")
     else:
         lablev, labind = _factorize(ref_labels)
-        labind = array(labind, dtype=int32)
-        mrk = _Markers.from_dict(markers, lablev, ref_features)
+        labind = numpy.array(labind, dtype=numpy.uint32)
+        mrk = _markers_from_dict(markers, lablev, ref_features)
 
-    return SinglePrebuiltReference(
-        lib.build_single_reference(
+    return TrainedSingleReference(
+        lib.train_single(
             ref_ptr.ptr,
-            labels=labind,
-            markers=mrk._ptr,
-            approximate=approximate,
-            nthreads=num_threads,
+            labind,
+            mrk,
+            approximate,
+            num_threads,
         ),
         labels=lablev,
         features=ref_features,

@@ -49,13 +49,13 @@ def _get_classic_markers_raw(ref_ptrs: list, ref_labels: list, ref_features: lis
                 remap[common_features_map[f]] = len(survivors) - 1
 
         da = delayedarray.DelayedArray(x)[survivors, :]
-        ptr = initialize(da)
+        ptr = mattress.initialize(da)
         med, lev = ptr.row_medians_by_group(ref_labels[i], num_threads=num_threads)
         tmp_labels.append(lev)
 
-        finalptr = initialize(med[remap, :])
+        finalptr = mattress.initialize(med[remap, :])
         ref2.append(finalptr)
-        ref2_ptrs[i] = finalptr.ptr
+        ref2_ptrs.append(finalptr.ptr)
 
     ref_labels = tmp_labels
 
@@ -94,7 +94,6 @@ def get_classic_markers(
     ref_features: Union[Sequence, list[Sequence]],
     assay_type: Union[str, int] = "logcounts",
     check_missing: bool = True,
-    restrict_to: Optional[Union[set, dict]] = None,
     num_de: Optional[int] = None,
     num_threads: int = 1,
 ) -> dict[Any, dict[Any, list]]:
@@ -134,11 +133,6 @@ def get_classic_markers(
             Whether to check for and remove rows with missing (NaN) values in the reference matrices.
             This can be set to False if it is known that no NaN values exist.
 
-        restrict_to:
-            Subset of available features to restrict to. Only features in
-            ``restrict_to`` will be used for marker detection. If None, no
-            restriction is performed.
-
         num_de:
             Number of differentially expressed genes to use as markers for each pairwise comparison between labels.
             If None, an appropriate number of genes is automatically determined.
@@ -173,9 +167,6 @@ def get_classic_markers(
             check_missing=check_missing,
             num_threads=num_threads,
         )
-
-        r, f = _restrict_features(r, f, restrict_to)
-
         ref_ptrs.append(r)
         tmp_features.append(f)
 
@@ -189,13 +180,16 @@ def get_classic_markers(
         num_threads=num_threads,
     )
 
+    return _markers_to_dict(raw_markers, common_labels, common_features)
+
+
+def _markers_to_dict(raw_markers, common_labels, common_features):
     markers = {}
     for i, x in enumerate(common_labels):
         current = {}
         for j, y in enumerate(common_labels):
             current[y] = [common_features[k] for k in raw_markers[i][j]]
         markers[x] = current
-
     return markers
 
 
