@@ -18,7 +18,7 @@ TrainedSingleIntersectPointer train_single(
     const BuilderPointer& builder,
     int nthreads)
 {
-    singlepp::TrainSingleOptions<uint32_t, double> opts;
+    singlepp::TrainSingleOptions<MatrixIndex, MatrixValue> opts;
     opts.num_threads = nthreads;
     opts.top = -1; // Use all available markers; assume subsetting was applied on the Python side.
     opts.trainer = BuilderPointer(BuilderPointer{}, builder.get()); // make a no-op shared pointer.

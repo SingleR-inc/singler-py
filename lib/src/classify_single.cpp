@@ -20,11 +20,11 @@ pybind11::tuple classify_single(const MatrixPointer& test, const TrainedSingleIn
     buffers.delta = static_cast<MatrixValue*>(delta.request().ptr);
 
     size_t nlabels = built->num_labels();
-    pybind11::array_t<MatrixValue, pybind11::array::f_style> scores({ ncells, nlabels });
+    pybind11::list scores(nlabels);
     buffers.scores.resize(nlabels);
-    auto sptr = static_cast<MatrixValue*>(scores.request().ptr);
     for (size_t l = 0; l < nlabels; ++l) {
-        buffers.scores[l] = sptr + ncells * l; // already size_t, no need to cast.
+        scores[l] = pybind11::array_t<MatrixValue>(ncells);
+        buffers.scores[l] = static_cast<MatrixValue*>(scores[l].cast<pybind11::array>().request().ptr);
     }
 
     // Running the analysis.

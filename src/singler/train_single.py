@@ -190,8 +190,8 @@ def train_single(
         ref_features_idx = numpy.array(range(len(ref_features)), dtype=numpy.uint32)
     else:
         common_features = _stable_intersect(test_features, ref_features)
-        test_features_idx = numpy.array(biocutils.match(test_features, common_features), dtype=numpy.uint32)
-        ref_features_idx = numpy.array(biocutils.match(ref_features, common_features), dtype=numpy.uint32)
+        test_features_idx = numpy.array(biocutils.match(common_features, test_features), dtype=numpy.uint32)
+        ref_features_idx = numpy.array(biocutils.match(common_features, ref_features), dtype=numpy.uint32)
 
     ref_ptr = mattress.initialize(ref_data)
     builder, _ = knncolle.define_builder(nn_parameters)
@@ -227,7 +227,6 @@ def identify_genes(ref_data, ref_features, ref_labels, unique_labels, markers, m
             )
         else:
             raise NotImplementedError("other marker methods are not yet implemented, sorry")
-        print(markers)
         return markers
 
     # Validating a user-supplied list of markers.

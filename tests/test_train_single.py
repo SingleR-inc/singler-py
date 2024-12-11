@@ -50,14 +50,13 @@ def test_train_single_restricted():
     )
     assert built.features == features
 
-    expected = singler.train_single(ref[keep, :], labels, restricted)
+    expected = singler.train_single(ref[keep,:], labels, restricted)
     assert built.markers == expected.markers
     assert built.marker_subset() == expected.marker_subset()
-    return
 
     # Check that the actual C++ content is the same.
     test = numpy.random.rand(10000, 50)
-    output = singler.classify_single_reference(test, features, built)
-    expected_output = singler.classify_single_reference(test, features, expected)
+    output = singler.classify_single(test, built)
+    expected_output = singler.classify_single(test[keep,:], expected)
     assert (output.column("delta") == expected_output.column("delta")).all()
     assert output.column("best") == expected_output.column("best")

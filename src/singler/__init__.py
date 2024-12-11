@@ -18,3 +18,4 @@ finally:
 
 from .get_classic_markers import get_classic_markers, number_of_classic_markers
 from .train_single import train_single, TrainedSingleReference
+from .classify_single import classify_single
