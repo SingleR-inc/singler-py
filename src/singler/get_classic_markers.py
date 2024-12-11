@@ -1,11 +1,10 @@
 from typing import Any, Optional, Sequence, Union
 
 import delayedarray
-from mattress import tatamize
-from numpy import int32, ndarray, uintp
+import mattress
+import numpy
 
-from . import _cpphelpers as lib
-from ._Markers import _Markers
+from . import lib_singler as lib
 from ._utils import (
     _clean_matrix,
     _create_map,
@@ -15,9 +14,7 @@ from ._utils import (
 )
 
 
-def _get_classic_markers_raw(
-    ref_ptrs, ref_labels, ref_features, num_de=None, num_threads=1
-):
+def _get_classic_markers_raw(ref_ptrs: list, ref_labels: list, ref_features: list, num_de=None, num_threads=1):
     nrefs = len(ref_ptrs)
 
     # We assume that ref_ptrs and ref_features contains the outputs of
@@ -32,15 +29,15 @@ def _get_classic_markers_raw(
     # Defining the intersection of features.
     common_features = _stable_intersect(*ref_features)
     if len(common_features) == 0:
-        for feat in ref_features:
-            if len(feat):
+        for r in ref_ptrs:
+            if r.nrow():
                 raise ValueError("no common feature names across 'features'")
 
     common_features_map = _create_map(common_features)
 
-    # Creating medians.
+    # Computing medians for each group within each median.
     ref2 = []
-    ref2_ptrs = ndarray((nrefs,), dtype=uintp)
+    ref2_ptrs = []
     tmp_labels = []
 
     for i, x in enumerate(ref_ptrs):
@@ -52,28 +49,26 @@ def _get_classic_markers_raw(
                 remap[common_features_map[f]] = len(survivors) - 1
 
         da = delayedarray.DelayedArray(x)[survivors, :]
-        ptr = tatamize(da)
+        ptr = initialize(da)
         med, lev = ptr.row_medians_by_group(ref_labels[i], num_threads=num_threads)
         tmp_labels.append(lev)
 
-        finalptr = tatamize(med[remap, :])
+        finalptr = initialize(med[remap, :])
         ref2.append(finalptr)
         ref2_ptrs[i] = finalptr.ptr
 
     ref_labels = tmp_labels
 
-    # Defining the union of labels.
+    # Defining the union of labels across all references.
     common_labels = _stable_union(*ref_labels)
     common_labels_map = _create_map(common_labels)
 
     labels2 = []
-    labels2_ptrs = ndarray((nrefs,), dtype=uintp)
     for i, lab in enumerate(ref_labels):
-        converted = ndarray(len(lab), dtype=int32)
+        converted = numpy.ndarray(len(lab), dtype=numpy.uint32)
         for j, x in enumerate(lab):
             converted[j] = common_labels_map[x]
         labels2.append(converted)
-        labels2_ptrs[i] = converted.ctypes.data
 
     # Finally getting around to calling markers.
     if num_de is None:
@@ -81,14 +76,13 @@ def _get_classic_markers_raw(
     elif num_de <= 0:
         raise ValueError("'num_de' should be positive")
 
-    raw_markers = _Markers(
-        lib.find_classic_markers(
-            nref=nrefs,
-            labels=labels2_ptrs.ctypes.data,
-            ref=ref2_ptrs.ctypes.data,
-            de_n=num_de,
-            nthreads=num_threads,
-        )
+    raw_markers = lib.find_classic_markers(
+        len(common_labels),
+        len(common_features),
+        ref2_ptrs,
+        labels2,
+        num_de,
+        num_threads
     )
 
     return raw_markers, common_labels, common_features
@@ -142,8 +136,8 @@ def get_classic_markers(
 
         restrict_to:
             Subset of available features to restrict to. Only features in
-            ``restrict_to`` will be used in the reference building. If None,
-            no restriction is performed.
+            ``restrict_to`` will be used for marker detection. If None, no
+            restriction is performed.
 
         num_de:
             Number of differentially expressed genes to use as markers for each pairwise comparison between labels.
@@ -195,12 +189,19 @@ def get_classic_markers(
         num_threads=num_threads,
     )
 
-    return raw_markers.to_dict(common_labels, common_features)
+    markers = {}
+    for i, x in enumerate(common_labels):
+        current = {}
+        for j, y in enumerate(common_labels):
+            current[y] = [common_features[k] for k in raw_markers[i][j]]
+        markers[x] = current
+
+    return markers
 
 
 def number_of_classic_markers(num_labels: int) -> int:
-    """Compute the number of markers to detect for a given number of labels, using the classic SingleR marker detection
-    algorithm.
+    """Compute the number of markers to detect for a given number of labels,
+    using the classic SingleR marker detection algorithm.
 
     Args:
         num_labels: Number of labels.

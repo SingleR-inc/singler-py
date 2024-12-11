@@ -62,7 +62,7 @@ if __name__ == "__main__":
     try:
         setup(
             use_scm_version={"version_scheme": "no-guess-dev"},
-            ext_modules=[CMakeExtension("mattress")],
+            ext_modules=[CMakeExtension("singler")],
             cmdclass={
                 'build_ext': build_ext
             }

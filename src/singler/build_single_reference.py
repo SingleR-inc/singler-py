@@ -3,7 +3,6 @@ from typing import Any, Literal, Optional, Sequence, Union
 import biocutils as ut
 from numpy import array, int32, ndarray
 
-from . import _cpphelpers as lib
 from ._Markers import _Markers
 from ._utils import _clean_matrix, _factorize, _restrict_features
 from .get_classic_markers import _get_classic_markers_raw

@@ -1,15 +1,15 @@
 from typing import Sequence, Tuple
 
-import biocutils as ut
-import numpy as np
-from delayedarray import DelayedArray
-from mattress import TatamiNumericPointer, tatamize
-from summarizedexperiment import SummarizedExperiment
+import biocutils
+import numpy
+import delayedarray
+import mattress 
+import summarizedexperiment
 
 
-def _factorize(x: Sequence) -> Tuple[list, np.ndarray]:
-    _factor = ut.Factor.from_sequence(x, sort_levels=False)
-    return _factor.levels, np.array(_factor.codes, np.int32)
+def _factorize(x: Sequence) -> Tuple[list, numpy.ndarray]:
+    _factor = biocutils.Factor.from_sequence(x, sort_levels=False)
+    return _factor.levels, numpy.array(_factor.codes, numpy.int32)
 
 
 def _create_map(x: Sequence) -> dict:
@@ -67,13 +67,13 @@ def _stable_union(*args) -> list:
 
 
 def _clean_matrix(x, features, assay_type, check_missing, num_threads):
-    if isinstance(x, TatamiNumericPointer):
+    if isinstance(x, mattress.InitializedMatrix):
         # Assume the pointer was previously generated from _clean_matrix,
         # so it's 2-dimensional, matches up with features and it's already
         # clean of NaNs... so we no-op and just return it directly.
         return x, features
 
-    if isinstance(x, SummarizedExperiment):
+    if isinstance(x, summarizedexperiment.SummarizedExperiment):
         if features is None:
             features = x.get_row_names()
         elif isinstance(features, str):
@@ -104,8 +104,8 @@ def _clean_matrix(x, features, assay_type, check_missing, num_threads):
         if k:
             new_features.append(features[i])
 
-    sub = DelayedArray(ptr)[retain, :]  # avoid re-tatamizing 'x'.
-    return tatamize(sub), new_features
+    sub = delayedarray.DelayedArray(ptr)[retain, :]  # avoid re-tatamizing 'x'.
+    return mattress.initialize(sub), new_features
 
 
 def _restrict_features(ptr, features, restrict_to):
@@ -117,5 +117,5 @@ def _restrict_features(ptr, features, restrict_to):
                 keep.append(i)
                 new_features.append(x)
         features = new_features
-        ptr = tatamize(DelayedArray(ptr)[keep, :])
+        ptr = mattress.initialize(delayedarray.DelayedArray(ptr)[keep, :])
     return ptr, features

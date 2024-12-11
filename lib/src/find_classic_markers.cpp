@@ -54,6 +54,11 @@ pybind11::list find_classic_markers(uint32_t num_labels, uint32_t num_genes, con
     return output;
 }
 
+uint32_t number_of_classic_markers(uint32_t num_labels) {
+    return singlepp::number_of_classic_markers(num_labels);
+}
+
 void init_find_classic_markers(pybind11::module& m) {
     m.def("find_classic_markers", &find_classic_markers);
+    m.def("number_of_classic_markers", &number_of_classic_markers);
 }
