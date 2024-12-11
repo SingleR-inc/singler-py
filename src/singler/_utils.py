@@ -3,13 +3,13 @@ from typing import Sequence, Tuple
 import biocutils
 import numpy
 import delayedarray
-import mattress 
 import summarizedexperiment
+import mattress
 
 
 def _factorize(x: Sequence) -> Tuple[list, numpy.ndarray]:
-    _factor = biocutils.Factor.from_sequence(x, sort_levels=False)
-    return _factor.levels, numpy.array(_factor.codes, numpy.int32)
+    f = biocutils.Factor.from_sequence(x, sort_levels=False)
+    return f.levels, numpy.array(f.codes, dtype=numpy.uint32)
 
 
 def _create_map(x: Sequence) -> dict:
@@ -67,19 +67,12 @@ def _stable_union(*args) -> list:
 
 
 def _clean_matrix(x, features, assay_type, check_missing, num_threads):
-    if isinstance(x, mattress.InitializedMatrix):
-        # Assume the pointer was previously generated from _clean_matrix,
-        # so it's 2-dimensional, matches up with features and it's already
-        # clean of NaNs... so we no-op and just return it directly.
-        return x, features
-
     if isinstance(x, summarizedexperiment.SummarizedExperiment):
         if features is None:
             features = x.get_row_names()
         elif isinstance(features, str):
             features = x.get_row_data().column(features)
         features = list(features)
-
         x = x.assay(assay_type)
 
     curshape = x.shape
@@ -91,31 +84,32 @@ def _clean_matrix(x, features, assay_type, check_missing, num_threads):
             "number of rows of 'x' should be equal to the length of 'features'"
         )
 
-    ptr = mattress.initialize(x)
     if not check_missing:
-        return ptr, features
+        return x, features
 
+    ptr = mattress.initialize(x)
     retain = ptr.row_nan_counts(num_threads=num_threads) == 0
     if retain.all():
-        return ptr, features
+        return x, features
 
     new_features = []
     for i, k in enumerate(retain):
         if k:
             new_features.append(features[i])
 
-    sub = delayedarray.DelayedArray(ptr)[retain, :]  # avoid re-tatamizing 'x'.
-    return mattress.initialize(sub), new_features
+    sub = delayedarray.DelayedArray(x)[retain, :]
+    return sub, new_features
 
 
-def _restrict_features(ptr, features, restrict_to):
+def _restrict_features(data, features, restrict_to):
     if restrict_to is not None:
+        if not isinstance(restrict_to, set):
+            restrict_to = set(restrict_to)
         keep = []
         new_features = []
         for i, x in enumerate(features):
             if x in restrict_to:
                 keep.append(i)
                 new_features.append(x)
-        features = new_features
-        ptr = mattress.initialize(delayedarray.DelayedArray(ptr)[keep, :])
-    return ptr, features
+        return delayedarray.DelayedArray(data)[keep, :], new_features
+    return data, features

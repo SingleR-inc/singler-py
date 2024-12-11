@@ -2,10 +2,13 @@ from typing import Any, Literal, Optional, Sequence, Union
 
 import biocutils
 import numpy
+import knncolle
+import mattress
+import delayedarray
 
 from . import lib_singler as lib
-from ._utils import _clean_matrix, _factorize
-from .get_classic_markers import _get_classic_markers_raw, _markers_to_dict
+from ._utils import _clean_matrix, _factorize, _restrict_features, _stable_intersect
+from .get_classic_markers import get_classic_markers
 
 
 class TrainedSingleReference:
@@ -76,25 +79,10 @@ class TrainedSingleReference:
             return [self._features[i] for i in buffer]
 
 
-def _markers_from_dict(markers: dict[Any, dict[Any, Sequence]], labels: Sequence, features: Sequence):
+def _markers_from_dict(markers: dict[Any, dict[Any, Sequence]], labels: Sequence, available_features: Sequence):
     fmapping = {}
-    for i, x in enumerate(features):
+    for i, x in enumerate(available_features):
         fmapping[x] = i
-
-    outer_instance = [None] * len(labels)
-    for outer_i, outer_k in enumerate(labels):
-        inner_instance = [None] * len(labels)
-
-        for inner_i, inner_k in enumerate(labels):
-            current = markers[outer_k][inner_k]
-            mapped = []
-            for x in current:
-                if x in fmapping:  # just skipping features that aren't present.
-                    mapped.append(fmapping[x])
-            inner_instance[inner_i] = numpy.array(mapped, dtype=numpy.uint32)
-
-        outer_instance[outer_i] = inner_instance
-
     return outer_instance
 
 
@@ -104,11 +92,12 @@ def train_single(
     ref_features: Sequence,
     test_features: Optional[Sequence] = None,
     assay_type: Union[str, int] = "logcounts",
+    restrict_to: Optional[Union[set, dict]] = None,
     check_missing: bool = True,
     markers: Optional[dict[Any, dict[Any, Sequence]]] = None,
     marker_method: Literal["classic"] = "classic",
     marker_args: dict = {},
-    approximate: bool = True,
+    nn_parameters: Optional[knncolle.Parameters] = knncolle.AnnoyParameters(),
     num_threads: int = 1,
     ) -> TrainedSingleReference:
     """Build a single reference dataset in preparation for classification.
@@ -144,6 +133,11 @@ def train_single(
             Whether to check for and remove rows with missing (NaN) values
             from ``ref_data``.
 
+        restrict_to:
+            Subset of available features to restrict to. Only features in
+            ``restrict_to`` will be used in the reference building. If None,
+            no restriction is performed.
+
         markers:
             Upregulated markers for each pairwise comparison between labels.
             Specifically, ``markers[a][b]`` should be a sequence of features
@@ -173,7 +167,7 @@ def train_single(
         :py:meth:`~singler.classify_single_reference.classify_single`.
     """
 
-    ref_ptr, ref_features = _clean_matrix(
+    ref_data, ref_features = _clean_matrix(
         ref_data,
         ref_features,
         assay_type=assay_type,
@@ -181,35 +175,95 @@ def train_single(
         num_threads=num_threads,
     )
 
-    ref_ptr, ref_features = _restrict_features(ref_ptr, ref_features, restrict_to)
+    unique_labels, label_idx = _factorize(ref_labels)
+    markers = identify_genes(ref_data, ref_features, ref_labels, unique_labels, markers, marker_method, test_features, restrict_to, marker_args, num_threads)
+    markers_idx = [None] * len(unique_labels)
+    for outer_i, outer_k in enumerate(unique_labels):
+        inner_instance = [None] * len(unique_labels)
+        for inner_i, inner_k in enumerate(unique_labels):
+            current = markers[outer_k][inner_k]
+            inner_instance[inner_i] = numpy.array(biocutils.match(current, ref_features), dtype=numpy.uint32)
+        markers_idx[outer_i] = inner_instance
 
+    if test_features is None:
+        test_features_idx = numpy.array(range(len(ref_features)), dtype=numpy.uint32)
+        ref_features_idx = numpy.array(range(len(ref_features)), dtype=numpy.uint32)
+    else:
+        common_features = _stable_intersect(test_features, ref_features)
+        test_features_idx = numpy.array(biocutils.match(test_features, common_features), dtype=numpy.uint32)
+        ref_features_idx = numpy.array(biocutils.match(ref_features, common_features), dtype=numpy.uint32)
+
+    ref_ptr = mattress.initialize(ref_data)
+    builder, _ = knncolle.define_builder(nn_parameters)
+    return TrainedSingleReference(
+        lib.train_single(
+            test_features_idx,
+            ref_ptr.ptr,
+            ref_features_idx,
+            label_idx,
+            markers_idx,
+            builder,
+            num_threads,
+        ),
+        labels = unique_labels,
+        features = ref_features,
+        markers = markers,
+    )
+
+
+def identify_genes(ref_data, ref_features, ref_labels, unique_labels, markers, marker_method, test_features, restrict_to, marker_args, num_threads):
+    ref_data, ref_features = _restrict_features(ref_data, ref_features, test_features)
+    ref_data, ref_features = _restrict_features(ref_data, ref_features, restrict_to)
+
+    # Deriving the markers from expression data.
     if markers is None:
         if marker_method == "classic":
-            mrk, lablev, ref_features = _get_classic_markers_raw(
-                ref_ptrs=[ref_ptr],
+            markers = get_classic_markers(
+                ref_data=[ref_data],
                 ref_labels=[ref_labels],
                 ref_features=[ref_features],
                 num_threads=num_threads,
                 **marker_args,
             )
-            markers = _markers_to_dict(mrk, lablev, ref_features)
-            labind = numpy.array(biocutils.match(ref_labels, lablev), dtype=numpy.uint32)
         else:
             raise NotImplementedError("other marker methods are not yet implemented, sorry")
-    else:
-        lablev, labind = _factorize(ref_labels)
-        labind = numpy.array(labind, dtype=numpy.uint32)
-        mrk = _markers_from_dict(markers, lablev, ref_features)
+        print(markers)
+        return markers
 
-    return TrainedSingleReference(
-        lib.train_single(
-            ref_ptr.ptr,
-            labind,
-            mrk,
-            approximate,
-            num_threads,
-        ),
-        labels=lablev,
-        features=ref_features,
-        markers=markers,
-    )
+    # Validating a user-supplied list of markers.
+    if not isinstance(markers, dict):
+        raise ValueError("'markers' should be a list where the labels are keys")
+    if len(unique_labels) != len(markers):
+        raise ValueError("'markers' should have length equal to the number of unique labels")
+
+    available_features = set(ref_features)
+    new_markers = {}
+    for x, y in markers.items():
+        if x not in unique_labels:
+            raise ValueError("unknown label '" + x + "' in 'markers'")
+
+        if isinstance(y, list):
+            collected = []
+            for g in y:
+                if g in available_features:
+                    collected.append(g)
+            output = {} 
+            for l in unique_labels:
+                output[l] = []
+            output[x] = collected
+        elif isinstance(y, dict):
+            if len(unique_labels) != len(y):
+                raise ValueError("each value of 'markers' should have length equal to the number of unique labels")
+            output = {} 
+            for x_inner, y_inner in y.items():
+                collected = []
+                for g in y_inner:
+                    if g in available_features:
+                        collected.append(g)
+                output[x_inner] = collected
+        else:
+            raise ValueError("values of 'markers' should be dictionaries")
+
+        new_markers[x] = output
+
+    return new_markers

@@ -8,7 +8,6 @@ from . import lib_singler as lib
 from ._utils import (
     _clean_matrix,
     _create_map,
-    _restrict_features,
     _stable_intersect,
     _stable_union,
 )
@@ -141,10 +140,9 @@ def get_classic_markers(
             Number of threads to use for the calculations.
 
     Returns:
-        A dictionary of dictionary of lists
-        containing the markers for each pairwise comparison between labels,
-        i.e., ``markers[a][b]`` contains the upregulated markers for label
-        ``a`` over label ``b``.
+        A dictionary of dictionary of lists containing the markers for each
+        pairwise comparison between labels, i.e., ``markers[a][b]`` contains
+        the upregulated markers for label ``a`` over label ``b``.
     """
     if not isinstance(ref_data, list):
         ref_data = [ref_data]
@@ -158,7 +156,7 @@ def get_classic_markers(
         raise ValueError("length of 'ref' and 'features' should be the same")
 
     ref_ptrs = []
-    tmp_features = []
+    cleaned_features = []
     for i in range(nrefs):
         r, f = _clean_matrix(
             ref_data[i],
@@ -167,23 +165,17 @@ def get_classic_markers(
             check_missing=check_missing,
             num_threads=num_threads,
         )
-        ref_ptrs.append(r)
-        tmp_features.append(f)
-
-    ref_features = tmp_features
+        ref_ptrs.append(mattress.initialize(r))
+        cleaned_features.append(f)
 
     raw_markers, common_labels, common_features = _get_classic_markers_raw(
         ref_ptrs=ref_ptrs,
         ref_labels=ref_labels,
-        ref_features=ref_features,
+        ref_features=cleaned_features,
         num_de=num_de,
         num_threads=num_threads,
     )
 
-    return _markers_to_dict(raw_markers, common_labels, common_features)
-
-
-def _markers_to_dict(raw_markers, common_labels, common_features):
     markers = {}
     for i, x in enumerate(common_labels):
         current = {}
