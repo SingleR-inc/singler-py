@@ -51,7 +51,7 @@ def test_classify_integrated():
             assert results2.column("best")[i] in labels2_set
 
     # Repeating without names.
-    integrated_un = singler.build_integrated_references(
+    integrated_un = singler.train_integrated(
         test_features,
         ref_prebuilt=[built1, built2],
     )
@@ -62,6 +62,6 @@ def test_classify_integrated():
         integrated_prebuilt=integrated_un,
     )
 
-    assert results.shape[0] == 50
-    assert set(results.column("best_reference")) == set([0, 1])
-    assert list(results.column("scores").column_names) == ['0', '1']
+    assert results_un.shape[0] == 50
+    assert set(results_un.column("best_reference")) == set([0, 1])
+    assert list(results_un.column("scores").column_names) == ['0', '1']

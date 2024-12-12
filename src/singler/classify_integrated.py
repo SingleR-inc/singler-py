@@ -3,11 +3,11 @@ from typing import Any, Sequence, Union
 import biocutils
 import biocframe 
 import mattress
+import summarizedexperiment
 import numpy
 
 from . import lib_singler as lib
 from .train_integrated import TrainedIntegratedReferences
-from ._utils import _extract_assay
 
 
 def classify_integrated(
@@ -74,27 +74,29 @@ def classify_integrated(
         from the best to the second-best reference. Each row corresponds to a
         column of ``test``.
     """
-    test_data, _ = _extract_assay(test_data, None, assay_type=assay_type)
-    ref_labs = integrated_prebuilt.reference_labels()
+    if isinstance(test_data, summarizedexperiment.SummarizedExperiment):
+        test_data = test_data.assay(assay_type)
+    ref_labs = integrated_prebuilt.reference_labels
 
     # Applying the sanity checks.
     if len(results) != len(ref_labs):
         raise ValueError("length of 'results' should equal the number of references")
     for i, curres in enumerate(results):
-        if test.shape[1] != curres.number_of_rows():
+        if test_data.shape[1] != curres.shape[0]:
             raise ValueError("numbers of cells in 'results' are not identical")
-        available = set(integrated_prebuilt.reference_labels()[i])
-        for l in curres.column("labels"):
+        available = set(ref_labs[i])
+        for l in curres.column("best"):
             if l not in available:
                 raise ValueError("not all labels in 'results' are present in the corresponding reference")
 
     collated = []
     for i, curres in enumerate(results):
         available = set(ref_labs[i])
-        collated.append(biocutils.match(curres.column("labels"), available, dtype=numpy.uint32))
+        collated.append(biocutils.match(curres.column("best"), available, dtype=numpy.uint32))
 
-    best_ref, raw_scores, delta = classify_integrated(
-        mattress.initialize(test_data),
+    test_ptr = mattress.initialize(test_data)
+    best_ref, raw_scores, delta = lib.classify_integrated(
+        test_ptr.ptr,
         collated,
         integrated_prebuilt._ptr,
         quantile,
@@ -106,24 +108,25 @@ def classify_integrated(
     best_label = [None] * test_data.shape[1]
     for ref in set(best_ref):
         curbest = results[ref].column("best")
-        for i, b in best:
+        for i, b in enumerate(curbest):
             if b == ref:
                 best_label[i] = curbest[i]
 
-    all_refs = integrated_prebuilt.reference_names()
-    if all_refs is None:
+    all_refs = integrated_prebuilt.reference_names
+    has_names = not (all_refs is None)
+    if not has_names:
         all_refs = [str(i) for i in range(len(ref_labs))]
     scores = {}
-    for i, l in enumerate(all_ref):
-        scores[l] = biocframe.BiocFrame({ "label": results[i].column("labels"), "score": raw_scores[i] })
+    for i, l in enumerate(all_refs):
+        scores[l] = biocframe.BiocFrame({ "label": results[i].column("best"), "score": raw_scores[i] })
     scores_df = biocframe.BiocFrame(scores, number_of_rows=test_data.shape[1], column_names=all_refs)
 
     if has_names:
         best_ref = [all_refs[b] for b in best_ref]
 
-    return bioc.BiocFrame({
+    return biocframe.BiocFrame({
         "best_label": best_label,
-        "best_reference": best,
+        "best_reference": best_ref,
         "scores": scores_df,
         "delta": delta,
     })

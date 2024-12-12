@@ -2,9 +2,9 @@ from typing import Any, Sequence, Union
 
 import biocframe
 import mattress
+import summarizedexperiment
 
 from . import lib_singler as lib
-from ._utils import _extract_assay, _create_map
 from .train_single import TrainedSingleReference 
 
 
@@ -63,7 +63,8 @@ def classify_single(
         the markers from each pairwise comparison between labels; and ``used``,
         a list containing the union of markers from all comparisons.
     """
-    test_data, _ = _extract_assay(test_data, None, assay_type=assay_type)
+    if isinstance(test_data, summarizedexperiment.SummarizedExperiment):
+        test_data = test_data.assay(assay_type)
     test_ptr = mattress.initialize(test_data)
 
     best, raw_scores, delta = lib.classify_single(

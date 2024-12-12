@@ -66,19 +66,13 @@ def _stable_union(*args) -> list:
     return output
 
 
-def _extract_assay(x, features, assay_type):
+def _clean_matrix(x, features, assay_type, check_missing, num_threads):
     if isinstance(x, summarizedexperiment.SummarizedExperiment):
         if features is None:
             features = x.get_row_names()
-        elif isinstance(features, str):
-            features = x.get_row_data().column(features)
-        features = list(features)
+        elif not isinstance(features, list):
+            features = list(features)
         x = x.assay(assay_type)
-    return x, features
-
-
-def _clean_matrix(x, features, assay_type, check_missing, num_threads):
-    x, features = _extract_assay(x, features, assay_type)
 
     curshape = x.shape
     if len(curshape) != 2:
