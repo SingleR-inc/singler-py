@@ -186,7 +186,7 @@ def train_single(
         inner_instance = [None] * len(unique_labels)
         for inner_i, inner_k in enumerate(unique_labels):
             current = markers[outer_k][inner_k]
-            inner_instance[inner_i] = numpy.array(biocutils.match(current, ref_features), dtype=numpy.uint32)
+            inner_instance[inner_i] = biocutils.match(current, ref_features, dtype=numpy.uint32)
         markers_idx[outer_i] = inner_instance
 
     if test_features is None:
@@ -194,8 +194,8 @@ def train_single(
         ref_features_idx = numpy.array(range(len(ref_features)), dtype=numpy.uint32)
     else:
         common_features = _stable_intersect(test_features, ref_features)
-        test_features_idx = numpy.array(biocutils.match(common_features, test_features), dtype=numpy.uint32)
-        ref_features_idx = numpy.array(biocutils.match(common_features, ref_features), dtype=numpy.uint32)
+        test_features_idx = biocutils.match(common_features, test_features, dtype=numpy.uint32)
+        ref_features_idx = biocutils.match(common_features, ref_features, dtype=numpy.uint32)
 
     ref_ptr = mattress.initialize(ref_data)
     builder, _ = knncolle.define_builder(nn_parameters)

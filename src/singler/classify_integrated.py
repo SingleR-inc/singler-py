@@ -91,7 +91,7 @@ def classify_integrated(
     collated = []
     for i, curres in enumerate(results):
         available = set(ref_labs[i])
-        collated.append(numpy.array(biocutils.match(curres.column("labels"), available), dtype=numpy.uint32))
+        collated.append(biocutils.match(curres.column("labels"), available, dtype=numpy.uint32))
 
     best_ref, raw_scores, delta = classify_integrated(
         mattress.initialize(test_data),

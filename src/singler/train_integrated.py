@@ -80,8 +80,8 @@ def train_integrated(
     all_inter_ref = []
     for i, trained in enumerate(ref_prebuilt):
         common = _stable_intersect(test_features, trained.features)
-        all_inter_test.append(numpy.array(biocutils.match(common, test_features), numpy.uint32))
-        all_inter_ref.append(numpy.array(biocutils.match(common, trained.features), numpy.uint32))
+        all_inter_test.append(biocutils.match(common, test_features, dtype=numpy.uint32))
+        all_inter_ref.append(biocutils.match(common, trained.features, dtype=numpy.uint32))
 
     all_data = [mattress.initialize(x._full_data) for x in ref_prebuilt]
 
