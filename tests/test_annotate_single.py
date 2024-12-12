@@ -46,12 +46,13 @@ def test_annotate_single_intersect():
         ref_labels=ref_labels,
     )
 
-    built = singler.build_single_reference(
-        ref[2000:, :], ref_labels=ref_labels, ref_features=ref_features[2000:]
+    built = singler.train_single(
+        ref[2000:, :],
+        ref_labels=ref_labels,
+        ref_features=ref_features[2000:],
+        test_features=test_features[:8000],
     )
-    expected = singler.classify_single_reference(
-        test[:8000, :], test_features[:8000], built
-    )
+    expected = singler.classify_single(test[:8000, :],  built)
 
     assert output.column("best") == expected.column("best")
     assert (output.column("delta") == expected.column("delta")).all()
