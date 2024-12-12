@@ -20,11 +20,15 @@ class TrainedSingleReference:
     def __init__(
         self,
         ptr,
+        full_data,
+        full_label_codes: numpy.ndarray,
         labels: Sequence,
         features: Sequence,
-        markers: dict[Any, dict[Any, Sequence]],
+        markers: dict[Any, dict[Any, Sequence]]
     ):
         self._ptr = ptr
+        self._full_data = full_data
+        self._full_label_codes = full_label_codes
         self._features = features
         self._labels = labels
         self._markers = markers
@@ -205,6 +209,8 @@ def train_single(
             builder,
             num_threads,
         ),
+        full_data = ref_data,
+        full_label_codes = label_idx,
         labels = unique_labels,
         features = ref_features,
         markers = markers,
