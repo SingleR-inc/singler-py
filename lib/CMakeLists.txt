@@ -13,6 +13,8 @@ pybind11_add_module(singler
     src/find_classic_markers.cpp
     src/train_single.cpp
     src/classify_single.cpp
+    src/train_integrated.cpp
+    src/classify_integrated.cpp
     src/init.cpp
 )
 
