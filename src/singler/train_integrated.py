@@ -1,7 +1,9 @@
 from typing import Sequence, Optional, Union
+
 import numpy 
 import biocutils
 import warnings
+import mattress
 
 from .train_single import TrainedSingleReference
 from . import lib_singler as lib
@@ -79,14 +81,16 @@ def train_integrated(
     for i, trained in enumerate(ref_prebuilt):
         common = _stable_intersect(test_features, trained.features)
         all_inter_test.append(numpy.array(biocutils.match(common, test_features), numpy.uint32))
-        all_inter_ref.append(numpy.array(biocutils.match(common, ref_features), numpy.uint32))
+        all_inter_ref.append(numpy.array(biocutils.match(common, trained.features), numpy.uint32))
+
+    all_data = [mattress.initialize(x._full_data) for x in ref_prebuilt]
 
     # Applying the integration.
-    ibuilt = train_integrated(
+    ibuilt = lib.train_integrated(
         all_inter_test,
-        [mattress.initialize(x._all_data) for x in ref_prebuilt],
+        [x.ptr for x in all_data],
         all_inter_ref,
-        [x._all_label_codes for x in ref_prebuilt],
+        [x._full_label_codes for x in ref_prebuilt],
         [x._ptr for x in ref_prebuilt],
         num_threads
     )
