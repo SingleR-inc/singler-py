@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 0.5.0
+
+- Switch to using **pybind11** for the Python/C++ interface.
+- Update to the latest **singlepp** C++ library.
+
 ## Version 0.4.0
 
 - chore: Remove Python 3.8 (EOL).
