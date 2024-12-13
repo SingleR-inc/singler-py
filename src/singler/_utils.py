@@ -101,14 +101,17 @@ def _clean_matrix(x, features, assay_type, check_missing, num_threads):
 
 
 def _restrict_features(data, features, restrict_to):
-    if restrict_to is not None:
-        if not isinstance(restrict_to, set):
-            restrict_to = set(restrict_to)
-        keep = []
-        new_features = []
-        for i, x in enumerate(features):
-            if x in restrict_to:
-                keep.append(i)
-                new_features.append(x)
-        return delayedarray.DelayedArray(data)[keep, :], new_features
-    return data, features
+    if restrict_to is None:
+        return data, features
+
+    if not isinstance(restrict_to, set):
+        restrict_to = set(restrict_to)
+    keep = []
+    for i, x in enumerate(features):
+        if x in restrict_to:
+            keep.append(i)
+
+    return (
+        delayedarray.DelayedArray(data)[keep, :],
+        biocutils.subset_sequence(features, keep)
+    )

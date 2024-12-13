@@ -102,8 +102,9 @@ def train_single(
     marker_method: Literal["classic"] = "classic",
     marker_args: dict = {},
     nn_parameters: Optional[knncolle.Parameters] = knncolle.AnnoyParameters(),
+    check_duplicated: bool = True,
     num_threads: int = 1,
-    ) -> TrainedSingleReference:
+) -> TrainedSingleReference:
     """Build a single reference dataset in preparation for classification.
 
     Args:
@@ -163,6 +164,10 @@ def train_single(
             Algorithm for constructing the neighbor search index, used to
             compute scores during classification.
 
+        check_duplicated:
+            Whether to remove rows with duplicate feature names. This can be
+            set to False if ``ref_features`` does not contain any duplicates.
+
         num_threads:
             Number of threads to use for reference building.
 
@@ -179,8 +184,19 @@ def train_single(
         num_threads=num_threads,
     )
 
+    if check_duplicated:
+        encountered = set()
+        keep = []
+        for i, rg in enumerate(ref_features):
+            if rg not in encountered:
+                encountered.add(rg)
+                keep.append(i)
+        if len(keep) != len(ref_features):
+            ref_features = biocutils.subset_sequence(ref_features, keep)
+            ref_data = delayedarray.DelayedArray(ref_data)[keep,:]
+
     unique_labels, label_idx = _factorize(ref_labels)
-    markers = identify_genes(ref_data, ref_features, ref_labels, unique_labels, markers, marker_method, test_features, restrict_to, marker_args, num_threads)
+    markers = _identify_genes(ref_data, ref_features, ref_labels, unique_labels, markers, marker_method, test_features, restrict_to, marker_args, num_threads)
     markers_idx = [None] * len(unique_labels)
     for outer_i, outer_k in enumerate(unique_labels):
         inner_instance = [None] * len(unique_labels)
@@ -217,7 +233,7 @@ def train_single(
     )
 
 
-def identify_genes(ref_data, ref_features, ref_labels, unique_labels, markers, marker_method, test_features, restrict_to, marker_args, num_threads):
+def _identify_genes(ref_data, ref_features, ref_labels, unique_labels, markers, marker_method, test_features, restrict_to, marker_args, num_threads):
     ref_data, ref_features = _restrict_features(ref_data, ref_features, test_features)
     ref_data, ref_features = _restrict_features(ref_data, ref_features, restrict_to)
 

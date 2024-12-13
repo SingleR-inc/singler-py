@@ -38,6 +38,16 @@ def test_train_single_markers():
     assert built.markers == mbuilt.markers
 
 
+def test_train_single_dedup():
+    ref = numpy.random.rand(10000, 10)
+    labels = ["A", "B", "C", "D", "E", "E", "D", "C", "B", "A"]
+    features = [str(i) for i in range(ref.shape[0])]
+    features[0] = "1"
+    built = singler.train_single(ref, labels, features)
+    assert built.features == features[1:] # duplicates are ignored
+    assert built._full_data.shape[0] == len(built.features)
+
+
 def test_train_single_restricted():
     ref = numpy.random.rand(10000, 10)
     labels = ["A", "B", "C", "D", "E", "E", "D", "C", "B", "A"]
