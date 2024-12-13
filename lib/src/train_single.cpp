@@ -17,10 +17,11 @@ TrainedSingleIntersectPointer train_single(
     const pybind11::array& ref_features,
     const pybind11::array& labels,
     const pybind11::list& markers,
-    const BuilderPointer& builder,
+    uintptr_t builder_ptr,
     int nthreads)
 {
     const auto& ref = mattress::cast(ref_ptr)->ptr;
+    const auto& builder = knncolle_py::cast_builder(builder_ptr)->ptr;
 
     singlepp::TrainSingleOptions<mattress::MatrixIndex, mattress::MatrixValue> opts;
     opts.num_threads = nthreads;
