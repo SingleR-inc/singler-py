@@ -13,8 +13,8 @@ from .get_classic_markers import get_classic_markers
 
 class TrainedSingleReference:
     """A prebuilt reference object, typically created by
-    :py:meth:`~singler.build_single_reference.build_single_reference`. This is intended for advanced users only and
-    should not be serialized.
+    :py:meth:`~singler.train_single.train_single`. This is intended for
+    advanced users only and should not be serialized.
     """
 
     def __init__(
@@ -110,7 +110,7 @@ def train_single(
         ref_data:
             A matrix-like object where rows are features, columns are
             reference profiles, and each entry is the expression value.
-            If `markers` is not provided, expression should be normalized
+            If ``markers`` is not provided, expression should be normalized
             and log-transformed in preparation for marker prioritization via
             differential expression analyses. Otherwise, any expression values
             are acceptable as only the ranking within each column is used.
@@ -130,7 +130,7 @@ def train_single(
 
         assay_type:
             Assay containing the expression matrix,
-            if `ref_data` is a
+            if ``ref_data`` is a
             :py:class:`~summarizedexperiment.SummarizedExperiment.SummarizedExperiment`.
 
         check_missing:
@@ -139,8 +139,8 @@ def train_single(
 
         restrict_to:
             Subset of available features to restrict to. Only features in
-            ``restrict_to`` will be used in the reference building. If None,
-            no restriction is performed.
+            ``restrict_to`` will be used in the reference building. If
+            ``None``, no restriction is performed.
 
         markers:
             Upregulated markers for each pairwise comparison between labels.
@@ -159,9 +159,9 @@ def train_single(
             Further arguments to pass to the chosen marker detection method.
             Only used if ``markers`` is not supplied.
 
-        approximate:
-            Whether to use an approximate neighbor search to compute scores
-            during classification.
+        nn_parameters:
+            Algorithm for constructing the neighbor search index, used to
+            compute scores during classification.
 
         num_threads:
             Number of threads to use for reference building.

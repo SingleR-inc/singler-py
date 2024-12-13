@@ -101,40 +101,51 @@ def get_classic_markers(
 
     Args:
         ref_data:
-            A matrix-like object containing the log-normalized expression values of a reference dataset.
-            Each column is a sample and each row is a feature.
+            A matrix-like object containing the log-normalized expression
+            values of a reference dataset.  Each column is a sample and each
+            row is a feature.
             
-            Alternatively, this can be a :py:class:`~summarizedexperiment.SummarizedExperiment.SummarizedExperiment`
+            Alternatively, this can be a
+            :py:class:`~summarizedexperiment.SummarizedExperiment.SummarizedExperiment`
             containing a matrix-like object in one of its assays.
             
-            Alternatively, a list of such matrices or ``SummarizedExperiment`` objects,
-            typically for multiple batches of the same reference;
-            it is assumed that different batches exhibit at least some overlap in their ``features`` and ``labels``.
+            Alternatively, a list of such matrices or ``SummarizedExperiment``
+            objects, typically for multiple batches of the same reference; it
+            is assumed that different batches exhibit at least some overlap in
+            their ``ref_features`` and ``ref_labels``.
 
         ref_labels:
-            A sequence of length equal to the number of columns of ``ref``,
+            If ``ref_data`` is not a list, ``ref_labels`` should be a sequence
+            of length equal to the number of columns of ``ref_data``,
             containing a label (usually a string) for each column.
-            Alternatively, a list of such sequences of length equal to that of a list ``ref``;
-            each sequence should have length equal to the number of columns of the corresponding entry of ``ref``.
+
+            If ``ref_data`` is a list, ``ref_labels`` should also be a list of
+            the same length. Each entry should be a sequence of length equal to
+            the number of columns of the corresponding entry of ``ref_data``.
 
         ref_features:
-            A sequence of length equal to the number of rows of ``ref``,
+            If ``ref_data`` is not a list, ``ref_features`` should be a
+            sequence of length equal to the number of rows of ``ref_data``,
             containing the feature name (usually a string) for each row.
-            Alternatively, a list of such sequences of length equal to that of a list ``ref``;
-            each sequence should have length equal to the number of rows of the corresponding entry of ``ref``.
+
+            If ``ref_data`` is a list, ``ref_features`` should also be a list
+            of the same length. Each entry should be a sequence of length
+            equal to the number of rows of the corresponding entry of ``ref``.
 
         assay_type:
-            Name or index of the assay containing the assay of interest,
-            if ``ref`` is or contains
-            :py:class:`~summarizedexperiment.SummarizedExperiment.SummarizedExperiment` objects.
+            Name or index of the assay of interest, if ``ref`` is or contains
+            :py:class:`~summarizedexperiment.SummarizedExperiment.SummarizedExperiment`
+            objects.
 
         check_missing:
-            Whether to check for and remove rows with missing (NaN) values in the reference matrices.
-            This can be set to False if it is known that no NaN values exist.
+            Whether to check for and remove rows with missing (NaN) values in
+            the reference matrices. This can be set to False if it is known
+            that no NaN values exist.
 
         num_de:
-            Number of differentially expressed genes to use as markers for each pairwise comparison between labels.
-            If None, an appropriate number of genes is automatically determined.
+            Number of differentially expressed genes to use as markers for each
+            pairwise comparison between labels. If ``None``, an appropriate
+            number of genes is automatically determined.
 
         num_threads:
             Number of threads to use for the calculations.

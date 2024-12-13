@@ -49,37 +49,21 @@ def annotate_integrated(
             - A ``SummarizedExperiment`` object containing such a matrix in its assays.
 
         ref_labels:
-            Sequence of the same length as ``ref_data``, where the contents
-            depend on the type of value in the corresponding entry of ``ref_data``:
-
-            - If ``ref_data[i]`` is a matrix-like object, ``ref_labels[i]`` should be
-              a sequence of length equal to the number of columns of ``ref_data[i]``,
-              containing the label associated with each column.
-            - If ``ref_data[i]`` is a ``SummarizedExperiment``, ``ref_labels[i]``
-              may be a string speciying the column name in `column_data` that contains the
-              features. It can also be set to ``None`` to use the row names of the
-              experiment as features.
+            Sequence of the same length as ``ref_data``. The ``i``-th entry
+            should be a sequence of length equal to the number of columns of
+            ``ref_data[i]``, containing the label associated with each column.
 
         test_features:
-            Sequence of length equal to the number of rows in
-            ``test_data``, containing the feature identifier for each row.
-
-            Alternatively, if ``test_data`` is a ``SummarizedExperiment``,
-            ``test_features`` may be a string speciying the column name in
-            `row_data` that contains the features. It can also be set to
-            ``None`` to use the row names of the experiment as features.
+            Sequence of length equal to the number of rows in ``test_data``,
+            containing the feature identifier for each row.  Alternatively
+            ``None``, to use the row names of the experiment as features.
 
         ref_features:
-            Sequence of the same length as ``ref_data``, where the contents
-            depend on the type of value in the corresponding entry of ``ref_data``:
-
-            - If ``ref_data[i]`` is a matrix-like object, ``ref_features[i]`` should be
-              a sequence of length equal to the number of rows of ``ref_data[i]``,
-              containing the feature identifier associated with each row.
-            - If ``ref_data[i]`` is a ``SummarizedExperiment``,
-              ``ref_features[i]`` may be a string speciying the column name in
-              `row_data` that contains the features. It can also be set to
-              ``None`` to use the row names of the experiment as features.
+            Sequence of the same length as ``ref_data``. The ``i``-th entry
+            should be a sequence of length equal to the number of rows of
+            ``ref_data[i]``, containing the feature identifier associated with
+            each row. It can also be set to ``None`` to use the row names of
+            the experiment as features.
 
             This can also be ``None`` to indicate that the row names should be
             used for all references, assuming ``ref_data`` only contains

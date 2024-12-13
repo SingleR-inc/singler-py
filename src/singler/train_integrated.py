@@ -22,7 +22,7 @@ class TrainedIntegratedReferences:
     @property
     def reference_names(self) -> Union[Sequence[str], None]:
         """Sequence containing the names of the references. Alternatively
-        None, if no names were supplied."""
+        ``None``, if no names were supplied."""
         return self._names
 
     @property
@@ -30,7 +30,7 @@ class TrainedIntegratedReferences:
         """List of lists containing the names of the labels for each reference.
 
         Each entry corresponds to a reference in :py:attr:`~reference_names`,
-        if ``reference_names`` is not None.
+        if ``reference_names`` is not ``None``.
         """
         return self._labels
 
@@ -50,10 +50,10 @@ def train_integrated(
 
         ref_prebuilt:
             List of prebuilt references, typically created by calling
-            :py:meth:`~singler.build_single_reference.train_single`.
+            :py:meth:`~singler.train_single.train_single`.
 
         ref_names:
-            Sequence of names for the references. If None, these are
+            Sequence of names for the references. If ``None``, these are
             automatically generated.
 
         warn_lost:

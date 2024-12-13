@@ -60,7 +60,7 @@ def annotate_single(
         ref_features:
             Sequence of length equal to the number of rows of ``ref_data``,
             containing the feature identifier for each row. Alternatively
-            ``None``, to use the `row_names` of the experiment as features.
+            ``None``, to use the row names of the experiment as features.
 
         test_assay_type:
             Assay containing the expression matrix, if ``test_data`` is a

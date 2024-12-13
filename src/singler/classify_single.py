@@ -33,10 +33,10 @@ def classify_single(
 
         ref_prebuilt:
             A pre-built reference created with
-            :py:meth:`~singler.build_single_reference.build_single_reference`.
+            :py:func:`~singler.train_single.train_single`.
 
         assay_type:
-            Assay containing the expression matrix, if `test_data` is a
+            Assay containing the expression matrix, if ``test_data`` is a
             :py:class:`~summarizedexperiment.SummarizedExperiment.SummarizedExperiment`.
 
         quantile:
@@ -57,7 +57,7 @@ def classify_single(
 
     Returns:
         A :py:class:`~BiocFrame.BiocFrame.BiocFrame` containing the ``best``
-        label, the ``scores`` for each label (as a nested BiocFrame), and the
+        label, the ``scores`` for each label as a nested ``BiocFrame``, and the
         ``delta`` from the best to the second-best label. Each row corresponds
         to a column of ``test``. The metadata contains ``markers``, a list of
         the markers from each pairwise comparison between labels; and ``used``,
