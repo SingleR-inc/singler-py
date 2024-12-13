@@ -5,6 +5,7 @@ import numpy
 import delayedarray
 import summarizedexperiment
 import mattress
+import warnings
 
 
 def _factorize(x: Sequence) -> Tuple[list, numpy.ndarray]:
@@ -70,6 +71,12 @@ def _clean_matrix(x, features, assay_type, check_missing, num_threads):
     if isinstance(x, summarizedexperiment.SummarizedExperiment):
         if features is None:
             features = x.get_row_names()
+        elif isinstance(features, str):
+            warnings.warn(
+                "setting 'features' to a column name of the row data is deprecated",
+                category=DeprecationWarning
+            )
+            features = x.get_row_data().column(features)
         elif not isinstance(features, list):
             features = list(features)
         x = x.assay(assay_type)

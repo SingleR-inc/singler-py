@@ -5,6 +5,7 @@ import numpy
 import knncolle
 import mattress
 import delayedarray
+import warnings
 
 from . import lib_singler as lib
 from ._utils import _clean_matrix, _factorize, _restrict_features, _stable_intersect
@@ -195,8 +196,26 @@ def train_single(
             ref_features = biocutils.subset_sequence(ref_features, keep)
             ref_data = delayedarray.DelayedArray(ref_data)[keep,:]
 
+    if isinstance(ref_labels, str):
+        warnings.warn(
+            "setting 'labels' to a column name of the column data is deprecated",
+            category=DeprecationWarning
+        )
+        ref_labels = ref_data.get_column_data().column(ref_labels)
     unique_labels, label_idx = _factorize(ref_labels)
-    markers = _identify_genes(ref_data, ref_features, ref_labels, unique_labels, markers, marker_method, test_features, restrict_to, marker_args, num_threads)
+
+    markers = _identify_genes(
+        ref_data=ref_data, 
+        ref_features=ref_features,
+        ref_labels=ref_labels,
+        unique_labels=unique_labels,
+        markers=markers,
+        marker_method=marker_method,
+        test_features=test_features,
+        restrict_to=restrict_to,
+        marker_args=marker_args,
+        num_threads=num_threads
+    )
     markers_idx = [None] * len(unique_labels)
     for outer_i, outer_k in enumerate(unique_labels):
         inner_instance = [None] * len(unique_labels)
