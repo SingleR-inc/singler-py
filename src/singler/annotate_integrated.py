@@ -1,6 +1,7 @@
 from typing import Any, Optional, Sequence, Tuple, Union
 
 import biocframe
+import warnings
 
 from ._utils import _clean_matrix, _restrict_features
 from .train_single import train_single
@@ -132,6 +133,15 @@ def annotate_integrated(
     all_ref_labels = []
     all_ref_features = []
     for r in range(nrefs):
+        curref_labels = ref_labels[r]
+        if isinstance(curref_labels, str):
+            warnings.warn(
+                "setting 'ref_labels' to a column name of the column data is deprecated",
+                category=DeprecationWarning
+            )
+            curref_labels = ref_data[r].get_column_data().column(curref_labels)
+        all_ref_labels.append(curref_labels)
+
         curref_data, curref_features = _clean_matrix(
             ref_data[r],
             ref_features[r],
@@ -161,7 +171,7 @@ def annotate_integrated(
     for r in range(nrefs):
         curbuilt = train_single(
             ref_data=all_ref_data[r],
-            ref_labels=ref_labels[r],
+            ref_labels=all_ref_labels[r],
             ref_features=all_ref_features[r],
             test_features=test_features,
             **train_single_args,

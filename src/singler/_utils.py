@@ -8,12 +8,6 @@ import mattress
 import warnings
 
 
-def _factorize(x: Sequence) -> Tuple[list, numpy.ndarray]:
-    f = biocutils.Factor.from_sequence(x, sort_levels=False)
-    print(f)
-    return f.levels, numpy.array(f.codes, dtype=numpy.uint32)
-
-
 def _create_map(x: Sequence) -> dict:
     mapping = {}
     for i, val in enumerate(x):

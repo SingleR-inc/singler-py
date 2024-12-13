@@ -8,7 +8,7 @@ import delayedarray
 import warnings
 
 from . import lib_singler as lib
-from ._utils import _clean_matrix, _factorize, _restrict_features, _stable_intersect
+from ._utils import _clean_matrix, _restrict_features, _stable_intersect
 from .get_classic_markers import get_classic_markers
 
 
@@ -176,6 +176,12 @@ def train_single(
         The pre-built reference, ready for use in downstream methods like
         :py:meth:`~singler.classify_single_reference.classify_single`.
     """
+    if isinstance(ref_labels, str):
+        warnings.warn(
+            "setting 'ref_labels' to a column name of the column data is deprecated",
+            category=DeprecationWarning
+        )
+        ref_labels = ref_data.get_column_data().column(ref_labels)
 
     ref_data, ref_features = _clean_matrix(
         ref_data,
@@ -196,13 +202,13 @@ def train_single(
             ref_features = biocutils.subset_sequence(ref_features, keep)
             ref_data = delayedarray.DelayedArray(ref_data)[keep,:]
 
-    if isinstance(ref_labels, str):
-        warnings.warn(
-            "setting 'labels' to a column name of the column data is deprecated",
-            category=DeprecationWarning
-        )
-        ref_labels = ref_data.get_column_data().column(ref_labels)
-    unique_labels, label_idx = _factorize(ref_labels)
+    for f in ref_labels:
+        if f is None:
+            raise ValueError("entries of 'ref_labels' cannot be missing")
+    if not isinstance(ref_labels, biocutils.Factor): # TODO: move over to biocutils so coercion can no-op.
+        ref_labels = biocutils.Factor.from_sequence(ref_labels, sort_levels=False) # TODO: add a dtype= option.
+    unique_labels = ref_labels.levels
+    label_idx = ref_labels.codes.astype(dtype=numpy.uint32, copy=False)
 
     markers = _identify_genes(
         ref_data=ref_data, 

@@ -30,7 +30,7 @@ def test_train_integrated():
         test_features,
         ref_prebuilt=[built1, built2],
         ref_names=["FOO", "BAR"],
-        num_threads=3,
+        num_threads=2,
     )
 
     assert pintegrated.reference_names == ["FOO", "BAR"]

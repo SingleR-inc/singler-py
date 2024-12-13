@@ -16,19 +16,17 @@ def test_with_minimal_args():
     )
     immune_cell_ref = celldex.fetch_reference("dice", "2024-02-26", realize_assays=True)
 
-    with pytest.raises(Exception):
-        singler.annotate_integrated(
-            test_data=sce.assays["counts"],
-            ref_data_list=(blueprint_ref, immune_cell_ref),
-            ref_labels_list="label.main",
-            num_threads=6,
-        )
-
     single, integrated = singler.annotate_integrated(
         test_data=sce,
-        ref_data_list=(blueprint_ref, immune_cell_ref),
-        ref_labels_list="label.main",
-        num_threads=6,
+        ref_data=(
+            blueprint_ref,
+            immune_cell_ref
+        ),
+        ref_labels=[
+            blueprint_ref.get_column_data().column("label.main"),
+            immune_cell_ref.get_column_data().column("label.main")
+        ],
+        num_threads=2
     )
     assert len(single) == 2
     assert isinstance(integrated, BiocFrame)
@@ -43,14 +41,21 @@ def test_with_all_supplied():
     immune_cell_ref = celldex.fetch_reference("dice", "2024-02-26", realize_assays=True)
 
     single, integrated = singler.annotate_integrated(
-        test_data=sce,
+        test_data=sce.assays["counts"],
         test_features=sce.get_row_names(),
-        ref_data_list=(blueprint_ref, immune_cell_ref),
-        ref_labels_list=[
-            x.get_column_data().column("label.main")
-            for x in (blueprint_ref, immune_cell_ref)
+        ref_data=(
+            blueprint_ref,
+            immune_cell_ref
+        ),
+        ref_labels=[
+            blueprint_ref.get_column_data().column("label.main"),
+            immune_cell_ref.get_column_data().column("label.main")
         ],
-        ref_features_list=[x.get_row_names() for x in (blueprint_ref, immune_cell_ref)],
+        ref_features=[
+            blueprint_ref.get_row_names(),
+            immune_cell_ref.get_row_names()
+        ],
+        num_threads=2
     )
 
     assert len(single) == 2
@@ -67,8 +72,9 @@ def test_with_colname():
 
     single, integrated = singler.annotate_integrated(
         test_data=sce,
-        ref_data_list=(blueprint_ref, immune_cell_ref),
-        ref_labels_list="label.main",
+        ref_data=(blueprint_ref, immune_cell_ref),
+        ref_labels=["label.main"] * 2,
+        num_threads=2
     )
 
     assert len(single) == 2

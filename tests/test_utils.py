@@ -1,22 +1,10 @@
 from singler._utils import (
-    _factorize,
     _stable_intersect,
     _stable_union,
     _clean_matrix,
 )
 import numpy
 import summarizedexperiment
-
-
-def test_factorize():
-    lev, ind = _factorize([1, 3, 5, 5, 3, 1])
-    assert list(lev) == ["1", "3", "5"]
-    assert (ind == [0, 1, 2, 2, 1, 0]).all()
-
-    # Preserves the order.
-    lev, ind = _factorize(["C", "D", "A", "B", "C", "A"])
-    assert list(lev) == ["C", "D", "A", "B"]
-    assert (ind == [0, 1, 2, 3, 0, 2]).all()
 
 
 def test_intersect():

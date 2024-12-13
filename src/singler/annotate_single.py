@@ -91,6 +91,13 @@ def annotate_single(
         A :py:class:`~biocframe.BiocFrame.BiocFrame` of labelling results, see
         :py:func:`~singler.classify_single.classify_single` for details.
     """
+    if isinstance(ref_labels, str):
+        warnings.warn(
+            "setting 'ref_labels' to a column name of the column data is deprecated",
+            category=DeprecationWarning
+        )
+        ref_labels = ref_data.get_column_data().column(ref_labels)
+
     test_data, test_features = _clean_matrix(
         test_data,
         test_features,
