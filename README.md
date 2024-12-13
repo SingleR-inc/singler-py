@@ -17,7 +17,7 @@
 
 ## Overview
 
-This package provides Python bindings to the [C++ implementation](https://github.com/LTLA/singlepp) of the [SingleR algorithm](https://github.com/LTLA/SingleR),
+This package provides Python bindings to the [C++ implementation](https://github.com/SingleR-inc/singlepp) of the [SingleR algorithm](https://github.com/SingleR-inc/SingleR),
 originally developed by [Aran et al. (2019)](https://www.nature.com/articles/s41590-018-0276-y).
 It is designed to annotate cell types by matching cells to known references based on their expression profiles.
 So kind of like Tinder, but for cells.
@@ -62,7 +62,7 @@ results = singler.annotate_single(
     test_data = mat,
     test_features = features,
     ref_data = ref_data,
-    ref_labels = "label.main",
+    ref_labels = ref_data.get_column_data().column("label.main"),
 )
 ```
 
@@ -94,23 +94,19 @@ Advanced users may prefer to build the reference and run the classification sepa
 This allows us to re-use the same reference for multiple datasets without repeating the build step.
 
 ```python
-built = singler.build_single_reference(
-    ref_data=ref_data.assay("logcounts"),
-    ref_labels=ref_data.col_data.column("label.main"),
-    ref_features=ref_data.get_row_names(),
-    restrict_to=features,
+built = singler.train_single(
+    ref_data = ref_data.assay("logcounts"),
+    ref_labels = ref_data.get_column_data().column("label.main"),
+    ref_features = ref_data.get_row_names(),
+    test_features = features,
 )
 ```
 
 And finally, we apply the pre-built reference to the test dataset to obtain our label assignments.
-This can be repeated with different datasets that have the same features or a superset of `features`.
+This can be repeated with different datasets that have the same features as `test_features=`.
 
 ```python
-output = singler.classify_single_reference(
-    mat,
-    test_features=features,
-    ref_prebuilt=built,
-)
+output = singler.classify_single(mat, ref_prebuilt=built)
 ```
 
     ## output
@@ -134,21 +130,25 @@ import singler
 import celldex
 
 blueprint_ref = celldex.fetch_reference("blueprint_encode", "2024-02-26", realize_assays=True)
-
 immune_cell_ref = celldex.fetch_reference("dice", "2024-02-26", realize_assays=True)
 
 single_results, integrated = singler.annotate_integrated(
     mat,
     features,
-    ref_data_list = (blueprint_ref, immune_cell_ref),
-    ref_labels_list = "label.main",
+    ref_data = [
+        blueprint_ref,
+        immune_cell_ref
+    ],
+    ref_labels = [
+        blueprint_ref.get_column_data().column("label.main"),
+        immune_cell_ref.get_column_data().column("label.main")
+    ],
     num_threads = 6
 )
 ```
 
 This annotates the test dataset against each reference individually to obtain the best per-reference label,
 and then it compares across references to find the best label from all references.
-Both the single and integrated annotations are reported for diagnostics.
 
 ```python
 integrated.column("best_label")
@@ -173,30 +173,4 @@ integrated.column("best_reference")
 ## 'Blueprint',
 ## ...
 ##]
-```
-
-## Developer notes
-
-Build the shared object file:
-
-```shell
-python setup.py build_ext --inplace
-```
-
-For quick testing:
-
-```shell
-pytest
-```
-
-For more complex testing:
-
-```shell
-python setup.py build_ext --inplace && tox
-```
-
-To rebuild the **ctypes** bindings with [**cpptypes**](https://github.com/BiocPy/ctypes-wrapper):
-
-```shell
-cpptypes src/singler/lib --py src/singler/_cpphelpers.py --cpp src/singler/lib/bindings.cpp --dll _core
 ```

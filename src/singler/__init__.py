@@ -16,10 +16,10 @@ finally:
     del version, PackageNotFoundError
 
 
-from .annotate_integrated import annotate_integrated
-from .annotate_single import annotate_single
-from .build_integrated_references import IntegratedReferences, build_integrated_references
-from .build_single_reference import build_single_reference
-from .classify_integrated_references import classify_integrated_references
-from .classify_single_reference import classify_single_reference
 from .get_classic_markers import get_classic_markers, number_of_classic_markers
+from .train_single import train_single, TrainedSingleReference
+from .classify_single import classify_single
+from .annotate_single import annotate_single
+from .train_integrated import train_integrated, TrainedIntegratedReferences
+from .classify_integrated import classify_integrated
+from .annotate_integrated import annotate_integrated
