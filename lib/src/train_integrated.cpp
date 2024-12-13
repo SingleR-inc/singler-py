@@ -1,5 +1,6 @@
 #include "def.h"
 #include "utils.h"
+#include "mattress.h"
 
 #include "singlepp/singlepp.hpp"
 #include "tatami/tatami.hpp"
@@ -18,12 +19,12 @@ TrainedIntegratedPointer train_integrated(
     int nthreads) 
 {
     size_t nrefs = references.size();
-    std::vector<singlepp::TrainIntegratedInput<MatrixValue, MatrixIndex, uint32_t> > inputs;
+    std::vector<singlepp::TrainIntegratedInput<mattress::MatrixValue, mattress::MatrixIndex, uint32_t> > inputs;
     inputs.reserve(nrefs);
-    std::vector<singlepp::Intersection<MatrixIndex> > intersections(nrefs);
+    std::vector<singlepp::Intersection<mattress::MatrixIndex> > intersections(nrefs);
 
     for (size_t r = 0; r < nrefs; ++r) {
-        const auto& curref = references[r].cast<MatrixPointer>();
+        const auto& curref = mattress::cast(references[r].cast<uintptr_t>())->ptr;
         const auto& curlabels = labels[r].cast<pybind11::array>();
         const auto& curbuilt = prebuilt[r].cast<TrainedSingleIntersectPointer>();
 
@@ -33,8 +34,8 @@ TrainedIntegratedPointer train_integrated(
         if (ninter != static_cast<size_t>(ref_ids.size())) {
             throw std::runtime_error("length of each entry of 'test_features' and 'ref_features' should be the same");
         }
-        const auto* test_ids_ptr = check_numpy_array<MatrixIndex>(test_ids);
-        const auto* ref_ids_ptr = check_numpy_array<MatrixIndex>(ref_ids);
+        const auto* test_ids_ptr = check_numpy_array<mattress::MatrixIndex>(test_ids);
+        const auto* ref_ids_ptr = check_numpy_array<mattress::MatrixIndex>(ref_ids);
 
         auto& curinter = intersections[r];
         curinter.reserve(ninter);

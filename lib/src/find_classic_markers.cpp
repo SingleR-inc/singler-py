@@ -1,5 +1,6 @@
 #include "def.h"
 #include "utils.h"
+#include "mattress.h"
 
 #include "singlepp/singlepp.hpp"
 #include "tatami/tatami.hpp"
@@ -15,13 +16,13 @@ pybind11::list find_classic_markers(uint32_t num_labels, uint32_t num_genes, con
         throw std::runtime_error("'ref' and 'labels' should have the same length");
     }
 
-    std::vector<const tatami::Matrix<MatrixValue, MatrixIndex>*> ref_ptrs;
+    std::vector<const tatami::Matrix<mattress::MatrixValue, mattress::MatrixIndex>*> ref_ptrs;
     ref_ptrs.reserve(num_ref);
     std::vector<const uint32_t*> lab_ptrs;
     lab_ptrs.reserve(num_ref);
 
     for (size_t r = 0; r < num_ref; ++r) {
-        auto ptr = reference[r].cast<MatrixPointer>().get();
+        auto ptr = mattress::cast(reference[r].cast<uintptr_t>())->ptr.get();
         ref_ptrs.emplace_back(ptr);
         if (ptr->nrow() != num_genes) {
             throw std::runtime_error("each entry of 'ref' should have number of rows equal to 'ngenes'");
@@ -46,7 +47,7 @@ pybind11::list find_classic_markers(uint32_t num_labels, uint32_t num_genes, con
         const auto& src = store[l];
         pybind11::list dest(num_labels);
         for (uint32_t l2 = 0; l2 < num_labels; ++l2) {
-            dest[l2] = pybind11::array_t<MatrixIndex>(src[l2].size(), src[l2].data());
+            dest[l2] = pybind11::array_t<mattress::MatrixIndex>(src[l2].size(), src[l2].data());
         }
         output[l] = dest;
     }

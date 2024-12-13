@@ -247,7 +247,7 @@ def train_single(
             ref_features_idx,
             label_idx,
             markers_idx,
-            builder,
+            builder.ptr,
             num_threads,
         ),
         full_data = ref_data,

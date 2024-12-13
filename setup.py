@@ -30,13 +30,17 @@ class build_ext(build_ext_orig):
 
         if not os.path.exists(build_temp):
             import assorthead
+            import mattress 
+            import knncolle 
             cmd = [ 
                 "cmake", 
                 "-S", "lib",
                 "-B", build_temp,
                 "-Dpybind11_DIR=" + os.path.join(os.path.dirname(pybind11.__file__), "share", "cmake", "pybind11"),
                 "-DPYTHON_EXECUTABLE=" + sys.executable,
-                "-DASSORTHEAD_INCLUDE_DIR=" + assorthead.includes()
+                "-DASSORTHEAD_INCLUDE_DIR=" + assorthead.includes(),
+                "-DMATTRESS_INCLUDE_DIR=" + mattress.includes(),
+                "-DKNNCOLLE_INCLUDE_DIR=" + knncolle.includes()
             ]
             if os.name != "nt":
                 cmd.append("-DCMAKE_BUILD_TYPE=Release")

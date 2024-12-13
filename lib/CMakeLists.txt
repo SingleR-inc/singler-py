@@ -19,6 +19,8 @@ pybind11_add_module(singler
 )
 
 target_include_directories(singler PRIVATE "${ASSORTHEAD_INCLUDE_DIR}")
+target_include_directories(singler PRIVATE "${MATTRESS_INCLUDE_DIR}")
+target_include_directories(singler PRIVATE "${KNNCOLLE_INCLUDE_DIR}")
 
 set_property(TARGET singler PROPERTY CXX_STANDARD 17)
 

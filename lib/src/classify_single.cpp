@@ -1,5 +1,6 @@
 #include "def.h"
 #include "utils.h"
+#include "mattress.h"
 
 #include "singlepp/singlepp.hpp"
 #include "tatami/tatami.hpp"
@@ -9,22 +10,24 @@
 #include <cstdint>
 #include <stdexcept>
 
-pybind11::tuple classify_single(const MatrixPointer& test, const TrainedSingleIntersectPointer& built, double quantile, bool use_fine_tune, double fine_tune_threshold, int nthreads) {
+pybind11::tuple classify_single(uintptr_t test_ptr, const TrainedSingleIntersectPointer& built, double quantile, bool use_fine_tune, double fine_tune_threshold, int nthreads) {
+    const auto& test = mattress::cast(test_ptr)->ptr;
+
     // Setting up outputs.
     size_t ncells = test->ncol();
-    pybind11::array_t<MatrixIndex> best(ncells);
-    pybind11::array_t<MatrixValue> delta(ncells);
+    pybind11::array_t<mattress::MatrixIndex> best(ncells);
+    pybind11::array_t<mattress::MatrixValue> delta(ncells);
 
-    singlepp::ClassifySingleBuffers<MatrixIndex, MatrixValue> buffers;
-    buffers.best = static_cast<MatrixIndex*>(best.request().ptr);
-    buffers.delta = static_cast<MatrixValue*>(delta.request().ptr);
+    singlepp::ClassifySingleBuffers<mattress::MatrixIndex, mattress::MatrixValue> buffers;
+    buffers.best = static_cast<mattress::MatrixIndex*>(best.request().ptr);
+    buffers.delta = static_cast<mattress::MatrixValue*>(delta.request().ptr);
 
     size_t nlabels = built->num_labels();
     pybind11::list scores(nlabels);
     buffers.scores.resize(nlabels);
     for (size_t l = 0; l < nlabels; ++l) {
-        scores[l] = pybind11::array_t<MatrixValue>(ncells);
-        buffers.scores[l] = static_cast<MatrixValue*>(scores[l].cast<pybind11::array>().request().ptr);
+        scores[l] = pybind11::array_t<mattress::MatrixValue>(ncells);
+        buffers.scores[l] = static_cast<mattress::MatrixValue*>(scores[l].cast<pybind11::array>().request().ptr);
     }
 
     // Running the analysis.

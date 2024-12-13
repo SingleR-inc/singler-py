@@ -1,5 +1,6 @@
 #include "def.h"
 #include "utils.h"
+#include "mattress.h"
 
 #include "singlepp/singlepp.hpp"
 #include "tatami/tatami.hpp"
@@ -10,7 +11,7 @@
 #include <stdexcept>
 
 pybind11::tuple classify_integrated(
-    const MatrixPointer& test, 
+    uintptr_t test_ptr, 
     const pybind11::list& results,
     const TrainedIntegratedPointer& integrated_build,
     double quantile,
@@ -18,6 +19,8 @@ pybind11::tuple classify_integrated(
     double fine_tune_threshold,
     int nthreads)
 {
+    const auto& test = mattress::cast(test_ptr)->ptr;
+
     // Setting up the previous results.
     size_t num_refs = results.size();
     std::vector<const uint32_t*> previous_results;
@@ -29,18 +32,18 @@ pybind11::tuple classify_integrated(
 
     // Setting up outputs.
     size_t ncells = test->ncol();
-    pybind11::array_t<MatrixIndex> best(ncells);
-    pybind11::array_t<MatrixValue> delta(ncells);
+    pybind11::array_t<mattress::MatrixIndex> best(ncells);
+    pybind11::array_t<mattress::MatrixValue> delta(ncells);
 
-    singlepp::ClassifyIntegratedBuffers<MatrixIndex, MatrixValue> buffers;
-    buffers.best = static_cast<MatrixIndex*>(best.request().ptr);
-    buffers.delta = static_cast<MatrixValue*>(delta.request().ptr);
+    singlepp::ClassifyIntegratedBuffers<mattress::MatrixIndex, mattress::MatrixValue> buffers;
+    buffers.best = static_cast<mattress::MatrixIndex*>(best.request().ptr);
+    buffers.delta = static_cast<mattress::MatrixValue*>(delta.request().ptr);
 
     pybind11::list scores(num_refs);
     buffers.scores.resize(num_refs);
     for (size_t l = 0; l < num_refs; ++l) {
-        scores[l] = pybind11::array_t<MatrixValue>(ncells);
-        buffers.scores[l] = static_cast<MatrixValue*>(scores[l].cast<pybind11::array>().request().ptr);
+        scores[l] = pybind11::array_t<mattress::MatrixValue>(ncells);
+        buffers.scores[l] = static_cast<mattress::MatrixValue*>(scores[l].cast<pybind11::array>().request().ptr);
     }
 
     // Running the integrated scoring.
