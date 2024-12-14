@@ -83,7 +83,7 @@ class TrainedSingleReference:
         if indices_only:
             return buffer
         else:
-            return [self._features[i] for i in buffer]
+            return biocutils.StringList(self._features[i] for i in buffer)
 
 
 def _markers_from_dict(markers: dict[Any, dict[Any, Sequence]], labels: Sequence, available_features: Sequence):
@@ -300,14 +300,14 @@ def _identify_genes(ref_data, ref_features, ref_labels, unique_labels, markers, 
                     collected.append(g)
             output = {} 
             for l in unique_labels:
-                output[l] = []
+                output[l] = biocutils.StringList()
             output[x] = collected
         elif isinstance(y, dict):
             if len(unique_labels) != len(y):
                 raise ValueError("each value of 'markers' should have length equal to the number of unique labels")
             output = {} 
             for x_inner, y_inner in y.items():
-                collected = []
+                collected = biocutils.StringList()
                 for g in y_inner:
                     if g in available_features:
                         collected.append(g)

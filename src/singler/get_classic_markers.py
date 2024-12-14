@@ -3,6 +3,7 @@ from typing import Any, Optional, Sequence, Union
 import delayedarray
 import mattress
 import numpy
+import biocutils
 
 from . import lib_singler as lib
 from ._utils import (
@@ -191,7 +192,7 @@ def get_classic_markers(
     for i, x in enumerate(common_labels):
         current = {}
         for j, y in enumerate(common_labels):
-            current[y] = [common_features[k] for k in raw_markers[i][j]]
+            current[y] = biocutils.StringList(common_features[k] for k in raw_markers[i][j])
         markers[x] = current
     return markers
 
