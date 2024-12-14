@@ -109,12 +109,16 @@ def classify_integrated(
         num_threads
     ) 
 
+    by_ref = {}
+    for i, b in enumerate(best_ref):
+        if b not in by_ref:
+            by_ref[b] = []
+        by_ref[b].append(i)
     best_label = [None] * test_data.shape[1]
-    for ref in set(best_ref):
+    for ref, which in by_ref.items():
         curbest = results[ref].column("best")
-        for i, b in enumerate(curbest):
-            if b == ref:
-                best_label[i] = curbest[i]
+        for i in which:
+            best_label[i] = curbest[i]
 
     all_refs = [str(i) for i in range(len(raw_scores))]
     scores = {}
