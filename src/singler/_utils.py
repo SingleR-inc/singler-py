@@ -75,6 +75,8 @@ def _clean_matrix(x, features, assay_type, check_missing, num_threads):
         elif not isinstance(features, list):
             features = list(features)
         x = x.assay(assay_type)
+    elif features is None:
+        raise ValueError("'features = None' is only supported for SummarizedExperiment objects")
 
     curshape = x.shape
     if len(curshape) != 2:
@@ -112,6 +114,9 @@ def _restrict_features(data, features, restrict_to):
     for i, x in enumerate(features):
         if x in restrict_to:
             keep.append(i)
+
+    if len(keep) == len(features):
+        return data, features
 
     return (
         delayedarray.DelayedArray(data)[keep, :],

@@ -6,7 +6,7 @@ import summarizedexperiment
 
 from .train_single import train_single 
 from .classify_single import classify_single
-from ._utils import _clean_matrix
+from ._utils import _clean_matrix, _restrict_features
 
 
 def annotate_single(
@@ -105,8 +105,6 @@ def annotate_single(
         check_missing=test_check_missing,
         num_threads=num_threads
     )
-    if test_features is None:
-        raise ValueError("could not determine 'test_features'") 
 
     ref_data, ref_features = _clean_matrix(
         ref_data,
@@ -115,8 +113,13 @@ def annotate_single(
         check_missing=ref_check_missing,
         num_threads=num_threads
     )
-    if ref_features is None:
-        raise ValueError("could not determine 'ref_features'") 
+
+    # Pre-slicing the test dataset for consistency with annotate_integrated.
+    test_data, test_features = _restrict_features(
+        test_data,
+        test_features,
+        ref_features
+    )
 
     built = train_single(
         ref_data=ref_data,

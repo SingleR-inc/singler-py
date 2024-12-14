@@ -207,8 +207,7 @@ def train_single(
     for f in ref_labels:
         if f is None:
             raise ValueError("entries of 'ref_labels' cannot be missing")
-    if not isinstance(ref_labels, biocutils.Factor): # TODO: move over to biocutils so coercion can no-op.
-        ref_labels = biocutils.Factor.from_sequence(ref_labels, sort_levels=False) # TODO: add a dtype= option.
+    ref_labels = biocutils.Factor.from_sequence(ref_labels, sort_levels=True) # TODO: add a dtype= option.
     unique_labels = ref_labels.levels
     label_idx = ref_labels.codes.astype(dtype=numpy.uint32, copy=False)
 
