@@ -20,12 +20,13 @@ class TrainedSingleReference:
 
     def __init__(
         self,
-        ptr,
-        full_data,
+        ptr: int,
+        full_data: Any,
         full_label_codes: numpy.ndarray,
         labels: Sequence,
         features: Sequence,
-        markers: dict[Any, dict[Any, Sequence]]
+        markers: dict[Any, dict[Any, Sequence]],
+        test_num_features: int,
     ):
         self._ptr = ptr
         self._full_data = full_data
@@ -33,6 +34,7 @@ class TrainedSingleReference:
         self._features = features
         self._labels = labels
         self._markers = markers
+        self._test_num_features = test_num_features # TODO: move to singlepp.
 
     def num_markers(self) -> int:
         """
@@ -233,10 +235,12 @@ def train_single(
     if test_features is None:
         test_features_idx = numpy.array(range(len(ref_features)), dtype=numpy.uint32)
         ref_features_idx = numpy.array(range(len(ref_features)), dtype=numpy.uint32)
+        test_num_features = len(ref_features)
     else:
         common_features = _stable_intersect(test_features, ref_features)
         test_features_idx = biocutils.match(common_features, test_features, dtype=numpy.uint32)
         ref_features_idx = biocutils.match(common_features, ref_features, dtype=numpy.uint32)
+        test_num_features = len(test_features)
 
     ref_ptr = mattress.initialize(ref_data)
     builder, _ = knncolle.define_builder(nn_parameters)
@@ -255,6 +259,7 @@ def train_single(
         labels = unique_labels,
         features = ref_features,
         markers = markers,
+        test_num_features = test_num_features,
     )
 
 

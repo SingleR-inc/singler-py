@@ -14,13 +14,14 @@ class TrainedIntegratedReferences:
     """Object containing integrated references, typically constructed by
     :py:meth:`~singler.train_integrated.train_integrated`."""
 
-    def __init__(self, ptr, ref_names, ref_labels):
+    def __init__(self, ptr: int, ref_names: Optional[Sequence], ref_labels: list, test_num_features: int):
         self._ptr = ptr
         self._names = ref_names
         self._labels = ref_labels
+        self._test_num_features = test_num_features # TODO: move to singlepp.
 
     @property
-    def reference_names(self) -> Union[Sequence[str], None]:
+    def reference_names(self) -> Union[Sequence, None]:
         """Sequence containing the names of the references. Alternatively
         ``None``, if no names were supplied."""
         return self._names
@@ -98,5 +99,6 @@ def train_integrated(
     return TrainedIntegratedReferences(
         ptr=ibuilt,
         ref_names=ref_names, 
-        ref_labels=[x.labels for x in ref_prebuilt]
+        ref_labels=[x.labels for x in ref_prebuilt],
+        test_num_features = len(test_features),
     )
