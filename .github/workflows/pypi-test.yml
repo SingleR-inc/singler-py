@@ -24,7 +24,10 @@ jobs:
           cache: "pip"
     
       - name: Specify gypsum cache
-        run: echo "GYPSUM_CACHE_DIR=$(pwd)/.gypsum_cache" >> $GITHUB_ENV
+        run: |
+          LOCATION=$(pwd)/.gypsum_cache
+          mkdir -p ${LOCATION} # TODO: move to gypsum_client
+          echo "GYPSUM_CACHE_DIR=${LOCATION}" >> $GITHUB_ENV
 
       - name: Cache gypsum assets
         uses: actions/cache@v4
