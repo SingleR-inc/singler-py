@@ -23,8 +23,7 @@ def test_classify_integrated():
 
     integrated = singler.train_integrated(
         test_features,
-        ref_prebuilt=[built1, built2],
-        ref_names=["first", "second"],
+        ref_prebuilt=[built1, built2]
     )
 
     # Running the full analysis.
@@ -39,8 +38,8 @@ def test_classify_integrated():
     )
 
     assert results.shape[0] == 50
-    assert set(results.column("best_reference")) == set(["first", "second"])
-    assert results.column("scores").has_column("first")
+    assert set(results.column("best_reference")) == set([0, 1])
+    assert list(results.column("scores").column_names) == ['0', '1']
 
     labels1_set = set(labels1)
     labels2_set = set(labels2)
@@ -49,19 +48,3 @@ def test_classify_integrated():
             assert results1.column("best")[i] in labels1_set
         else:
             assert results2.column("best")[i] in labels2_set
-
-    # Repeating without names.
-    integrated_un = singler.train_integrated(
-        test_features,
-        ref_prebuilt=[built1, built2],
-    )
-
-    results_un = singler.classify_integrated(
-        test,
-        results=[results1, results2],
-        integrated_prebuilt=integrated_un,
-    )
-
-    assert results_un.shape[0] == 50
-    assert set(results_un.column("best_reference")) == set([0, 1])
-    assert list(results_un.column("scores").column_names) == ['0', '1']

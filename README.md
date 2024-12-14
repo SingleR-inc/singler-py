@@ -164,13 +164,14 @@ integrated.column("best_label")
 ## ]
 
 integrated.column("best_reference")
-## ['Blueprint',
-## 'Blueprint',
-## 'Blueprint',
-## 'Blueprint',
-## 'Blueprint',
-## 'Blueprint',
-## 'Blueprint',
-## ...
-##]
+## [0,
+##  0, 
+##  0,
+##  0,
+##  0,
+##  0,
+##  0,
+##  0,
+##  ...
+## ]
 ```

@@ -21,7 +21,6 @@ def test_train_integrated():
         ref_prebuilt=[built1, built2]
     )
 
-    assert integrated.reference_names == None
     assert list(integrated.reference_labels[0]) == ["A", "B", "C", "D", "E"]
     assert list(integrated.reference_labels[1]) == ["z", "y", "x"]
 
@@ -29,9 +28,7 @@ def test_train_integrated():
     pintegrated = singler.train_integrated(
         test_features,
         ref_prebuilt=[built1, built2],
-        ref_names=["FOO", "BAR"],
         num_threads=2,
     )
 
-    assert pintegrated.reference_names == ["FOO", "BAR"]
     assert pintegrated.reference_labels == integrated.reference_labels

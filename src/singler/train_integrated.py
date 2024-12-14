@@ -14,17 +14,10 @@ class TrainedIntegratedReferences:
     """Object containing integrated references, typically constructed by
     :py:meth:`~singler.train_integrated.train_integrated`."""
 
-    def __init__(self, ptr: int, ref_names: Optional[Sequence], ref_labels: list, test_num_features: int):
+    def __init__(self, ptr: int, ref_labels: list, test_num_features: int):
         self._ptr = ptr
-        self._names = ref_names
         self._labels = ref_labels
         self._test_num_features = test_num_features # TODO: move to singlepp.
-
-    @property
-    def reference_names(self) -> Union[Sequence, None]:
-        """Sequence containing the names of the references. Alternatively
-        ``None``, if no names were supplied."""
-        return self._names
 
     @property
     def reference_labels(self) -> list:
@@ -39,7 +32,6 @@ class TrainedIntegratedReferences:
 def train_integrated(
     test_features: Sequence,
     ref_prebuilt: list[TrainedSingleReference],
-    ref_names: Optional[Sequence[str]] = None,
     warn_lost: bool = True,
     num_threads: int = 1,
 ) -> TrainedIntegratedReferences:
@@ -52,10 +44,6 @@ def train_integrated(
         ref_prebuilt:
             List of prebuilt references, typically created by calling
             :py:meth:`~singler.train_single.train_single`.
-
-        ref_names:
-            Sequence of names for the references. If ``None``, these are
-            automatically generated.
 
         warn_lost:
             Whether to emit a warning if the markers for each reference are not
@@ -98,7 +86,6 @@ def train_integrated(
 
     return TrainedIntegratedReferences(
         ptr=ibuilt,
-        ref_names=ref_names, 
         ref_labels=[x.labels for x in ref_prebuilt],
         test_num_features = len(test_features),
     )
