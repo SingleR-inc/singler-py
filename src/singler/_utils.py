@@ -1,15 +1,11 @@
 from typing import Sequence, Tuple
 
-import biocutils as ut
-import numpy as np
-from delayedarray import DelayedArray
-from mattress import TatamiNumericPointer, tatamize
-from summarizedexperiment import SummarizedExperiment
-
-
-def _factorize(x: Sequence) -> Tuple[list, np.ndarray]:
-    _factor = ut.Factor.from_sequence(x, sort_levels=False)
-    return _factor.levels, np.array(_factor.codes, np.int32)
+import biocutils
+import numpy
+import delayedarray
+import summarizedexperiment
+import mattress
+import warnings
 
 
 def _create_map(x: Sequence) -> dict:
@@ -67,19 +63,17 @@ def _stable_union(*args) -> list:
 
 
 def _clean_matrix(x, features, assay_type, check_missing, num_threads):
-    if isinstance(x, TatamiNumericPointer):
-        # Assume the pointer was previously generated from _clean_matrix,
-        # so it's 2-dimensional, matches up with features and it's already
-        # clean of NaNs... so we no-op and just return it directly.
-        return x, features
-
-    if isinstance(x, SummarizedExperiment):
+    if isinstance(x, summarizedexperiment.SummarizedExperiment):
         if features is None:
             features = x.get_row_names()
         elif isinstance(features, str):
+            warnings.warn(
+                "setting 'features' to a column name of the row data is deprecated",
+                category=DeprecationWarning
+            )
             features = x.get_row_data().column(features)
-        features = list(features)
-
+        elif not isinstance(features, list):
+            features = list(features)
         x = x.assay(assay_type)
 
     curshape = x.shape
@@ -91,31 +85,35 @@ def _clean_matrix(x, features, assay_type, check_missing, num_threads):
             "number of rows of 'x' should be equal to the length of 'features'"
         )
 
-    ptr = tatamize(x)
     if not check_missing:
-        return ptr, features
+        return x, features
 
+    ptr = mattress.initialize(x)
     retain = ptr.row_nan_counts(num_threads=num_threads) == 0
     if retain.all():
-        return ptr, features
+        return x, features
 
     new_features = []
     for i, k in enumerate(retain):
         if k:
             new_features.append(features[i])
 
-    sub = DelayedArray(ptr)[retain, :]  # avoid re-tatamizing 'x'.
-    return tatamize(sub), new_features
+    sub = delayedarray.DelayedArray(x)[retain, :]
+    return sub, new_features
 
 
-def _restrict_features(ptr, features, restrict_to):
-    if restrict_to is not None:
-        keep = []
-        new_features = []
-        for i, x in enumerate(features):
-            if x in restrict_to:
-                keep.append(i)
-                new_features.append(x)
-        features = new_features
-        ptr = tatamize(DelayedArray(ptr)[keep, :])
-    return ptr, features
+def _restrict_features(data, features, restrict_to):
+    if restrict_to is None:
+        return data, features
+
+    if not isinstance(restrict_to, set):
+        restrict_to = set(restrict_to)
+    keep = []
+    for i, x in enumerate(features):
+        if x in restrict_to:
+            keep.append(i)
+
+    return (
+        delayedarray.DelayedArray(data)[keep, :],
+        biocutils.subset_sequence(features, keep)
+    )
