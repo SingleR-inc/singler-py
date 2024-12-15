@@ -18,8 +18,15 @@ def test_classify_single_simple():
     for x in output.column("best"):
         assert x in all_names
 
+    # Same results in parallel.
+    poutput = singler.classify_single(test, built, num_threads = 2)
+    assert output.column("best") == poutput.column("best")
+    assert (output.column("delta") == poutput.column("delta")).all()
+
 
 def test_classify_single_sanity():
+    numpy.random.seed(69)
+
     ref = numpy.random.rand(10000, 10) + 1
     ref[:2000, :2] = 0
     ref[2000:4000, 2:4] = 0

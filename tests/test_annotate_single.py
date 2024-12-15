@@ -1,8 +1,11 @@
 import singler
 import numpy
+import biocutils
 
 
 def test_annotate_single_sanity():
+    numpy.random.seed(123456) # ensure we don't get surprised by different results.
+
     ref = numpy.random.rand(10000, 10) + 1
     ref[:2000, :2] = 0
     ref[2000:4000, 2:4] = 0
@@ -29,6 +32,22 @@ def test_annotate_single_sanity():
 
     assert output.shape[0] == 5
     assert output.column("best") == ["B", "D", "A", "E", "C"]
+
+    # To mix it up a little, we're going to be taking every 2nd element of the
+    # ref and every 3rd element of the test, just to make sure that the slicing
+    # works as expected.
+    rkeep = list(range(0, ref.shape[0], 2))
+    tkeep = list(range(0, ref.shape[0], 3))
+    output2 = singler.annotate_single(
+        test[tkeep,:],
+        test_features=biocutils.subset_sequence(all_features, tkeep),
+        ref_data=ref[rkeep,:],
+        ref_features=biocutils.subset_sequence(all_features, rkeep),
+        ref_labels=labels,
+    )
+
+    assert output2.shape[0] == 5
+    assert output2.column("best") == ["B", "D", "A", "E", "C"]
 
 
 def test_annotate_single_intersect():
