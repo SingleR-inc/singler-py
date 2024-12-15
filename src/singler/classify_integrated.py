@@ -81,22 +81,19 @@ def classify_integrated(
         raise ValueError("number of rows in 'test_data' is not consistent with 'test_features=' used to create 'integrated_prebuilt'")
 
     ref_labs = integrated_prebuilt.reference_labels
-
-    # Applying the sanity checks.
     if len(results) != len(ref_labs):
         raise ValueError("length of 'results' should equal the number of references")
+
+    collated = []
     for i, curres in enumerate(results):
         if test_data.shape[1] != curres.shape[0]:
             raise ValueError("numbers of cells in 'results' are not identical")
         available = set(ref_labs[i])
-        for l in curres.column("best"):
+        curbest = curres.column("best")
+        for l in curbest:
             if l not in available:
                 raise ValueError("not all labels in 'results' are present in the corresponding reference")
-
-    collated = []
-    for i, curres in enumerate(results):
-        available = set(ref_labs[i])
-        collated.append(biocutils.match(curres.column("best"), available, dtype=numpy.uint32))
+        collated.append(biocutils.match(curbest, ref_labs[i], dtype=numpy.uint32))
 
     test_ptr = mattress.initialize(test_data)
     best_ref, raw_scores, delta = lib.classify_integrated(
