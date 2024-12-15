@@ -1,6 +1,11 @@
 singler package
 ===============
 
+.. automodule:: singler
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Submodules
 ----------
 
@@ -20,34 +25,18 @@ singler.annotate\_single module
    :undoc-members:
    :show-inheritance:
 
-singler.build\_integrated\_references module
---------------------------------------------
+singler.classify\_integrated module
+-----------------------------------
 
-.. automodule:: singler.build_integrated_references
+.. automodule:: singler.classify_integrated
    :members:
    :undoc-members:
    :show-inheritance:
 
-singler.build\_single\_reference module
----------------------------------------
+singler.classify\_single module
+-------------------------------
 
-.. automodule:: singler.build_single_reference
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-singler.classify\_integrated\_references module
------------------------------------------------
-
-.. automodule:: singler.classify_integrated_references
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-singler.classify\_single\_reference module
-------------------------------------------
-
-.. automodule:: singler.classify_single_reference
+.. automodule:: singler.classify_single
    :members:
    :undoc-members:
    :show-inheritance:
@@ -60,10 +49,18 @@ singler.get\_classic\_markers module
    :undoc-members:
    :show-inheritance:
 
-Module contents
----------------
+singler.train\_integrated module
+--------------------------------
 
-.. automodule:: singler
+.. automodule:: singler.train_integrated
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+singler.train\_single module
+----------------------------
+
+.. automodule:: singler.train_single
    :members:
    :undoc-members:
    :show-inheritance:

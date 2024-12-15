@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" />
 
     <!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
-        <title>singler.annotate_single - singler unknown documentation</title>
+        <title>singler.classify_single - singler unknown documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=302659d7" />
@@ -241,148 +241,108 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <h1>Source code for singler.annotate_single</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">warnings</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Union</span>
+          <h1>Source code for singler.classify_single</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">biocframe</span>
+<span class="kn">import</span> <span class="nn">mattress</span>
 <span class="kn">import</span> <span class="nn">summarizedexperiment</span>
 
-<span class="kn">from</span> <span class="nn">.train_single</span> <span class="kn">import</span> <span class="n">train_single</span> 
-<span class="kn">from</span> <span class="nn">.classify_single</span> <span class="kn">import</span> <span class="n">classify_single</span>
-<span class="kn">from</span> <span class="nn">._utils</span> <span class="kn">import</span> <span class="n">_clean_matrix</span><span class="p">,</span> <span class="n">_restrict_features</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">lib_singler</span> <span class="k">as</span> <span class="n">lib</span>
+<span class="kn">from</span> <span class="nn">.train_single</span> <span class="kn">import</span> <span class="n">TrainedSingleReference</span> 
 
 
-<div class="viewcode-block" id="annotate_single">
-<a class="viewcode-back" href="../../api/singler.html#singler.annotate_single.annotate_single">[docs]</a>
-<span class="k">def</span> <span class="nf">annotate_single</span><span class="p">(</span>
+<div class="viewcode-block" id="classify_single">
+<a class="viewcode-back" href="../../api/singler.html#singler.classify_single.classify_single">[docs]</a>
+<span class="k">def</span> <span class="nf">classify_single</span><span class="p">(</span>
     <span class="n">test_data</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-    <span class="n">ref_data</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-    <span class="n">ref_labels</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">,</span>
-    <span class="n">test_features</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">ref_features</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">test_assay_type</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-    <span class="n">ref_assay_type</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-    <span class="n">test_check_missing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">ref_check_missing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="n">train_args</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{},</span>
-    <span class="n">classify_args</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{},</span>
+    <span class="n">ref_prebuilt</span><span class="p">:</span> <span class="n">TrainedSingleReference</span><span class="p">,</span>
+    <span class="n">assay_type</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">quantile</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.8</span><span class="p">,</span>
+    <span class="n">use_fine_tune</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">fine_tune_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.05</span><span class="p">,</span>
     <span class="n">num_threads</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">biocframe</span><span class="o">.</span><span class="n">BiocFrame</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Annotate a single-cell expression dataset based on the correlation</span>
-<span class="sd">    of each cell to profiles in a labelled reference.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Classify a test dataset against a reference by assigning labels from the latter to each column of the former</span>
+<span class="sd">    using the SingleR algorithm.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        test_data:</span>
-<span class="sd">            A matrix-like object representing the test dataset, where rows are</span>
-<span class="sd">            features and columns are samples (usually cells). Entries should be expression</span>
-<span class="sd">            values; only the ranking within each column will be used.</span>
+<span class="sd">            A matrix-like object where each row is a feature and each column</span>
+<span class="sd">            is a test sample (usually a single cell), containing expression values.</span>
+<span class="sd">            Normalized and transformed expression values are also acceptable as only</span>
+<span class="sd">            the ranking is used within this function.</span>
 
 <span class="sd">            Alternatively, a</span>
 <span class="sd">            :py:class:`~summarizedexperiment.SummarizedExperiment.SummarizedExperiment`</span>
-<span class="sd">            containing such a matrix in one of its assays. Non-default assay</span>
-<span class="sd">            types can be specified in ``classify_args``.</span>
+<span class="sd">            containing such a matrix in one of its assays.</span>
 
-<span class="sd">        ref_data:</span>
-<span class="sd">            A matrix-like object representing the reference dataset, where rows</span>
-<span class="sd">            are features and columns are samples. Entries should be expression values,</span>
-<span class="sd">            usually log-transformed (see comments for the ``ref`` argument in</span>
-<span class="sd">            :py:func:`~singler.train_single.train_single`).</span>
+<span class="sd">        ref_prebuilt:</span>
+<span class="sd">            A pre-built reference created with</span>
+<span class="sd">            :py:func:`~singler.train_single.train_single`.</span>
 
-<span class="sd">            Alternatively, a</span>
-<span class="sd">            :py:class:`~summarizedexperiment.SummarizedExperiment.SummarizedExperiment`</span>
-<span class="sd">            containing such a matrix in one of its assays. Non-default assay</span>
-<span class="sd">            types can be specified in ``classify_args``.</span>
-
-<span class="sd">        ref_labels:</span>
-<span class="sd">            Sequence of length equal to the number of columns of ``ref_data``,</span>
-<span class="sd">            containing the label associated with each column.</span>
-
-<span class="sd">        test_features:</span>
-<span class="sd">            Sequence of length equal to the number of rows in ``test_data``,</span>
-<span class="sd">            containing the feature identifier for each row. Alternatively</span>
-<span class="sd">            ``None``, to use the row names of the experiment as features.</span>
-
-<span class="sd">        ref_features:</span>
-<span class="sd">            Sequence of length equal to the number of rows of ``ref_data``,</span>
-<span class="sd">            containing the feature identifier for each row. Alternatively</span>
-<span class="sd">            ``None``, to use the row names of the experiment as features.</span>
-
-<span class="sd">        test_assay_type:</span>
+<span class="sd">        assay_type:</span>
 <span class="sd">            Assay containing the expression matrix, if ``test_data`` is a</span>
 <span class="sd">            :py:class:`~summarizedexperiment.SummarizedExperiment.SummarizedExperiment`.</span>
 
-<span class="sd">        ref_assay_type:</span>
-<span class="sd">            Assay containing the expression matrix, if ``ref_data`` is a</span>
-<span class="sd">            :py:class:`~summarizedexperiment.SummarizedExperiment.SummarizedExperiment`.</span>
+<span class="sd">        quantile:</span>
+<span class="sd">            Quantile of the correlation distribution for computing the score for each label.</span>
+<span class="sd">            Larger values increase sensitivity of matches at the expense of</span>
+<span class="sd">            similarity to the average behavior of each label.</span>
 
-<span class="sd">        test_assay_type:</span>
-<span class="sd">            Whether to remove rows with missing values from the test dataset.</span>
+<span class="sd">        use_fine_tune:</span>
+<span class="sd">            Whether fine-tuning should be performed. This improves accuracy for distinguishing</span>
+<span class="sd">            between similar labels but requires more computational work.</span>
 
-<span class="sd">        ref_assay_type:</span>
-<span class="sd">            Whether to remove rows with missing values from the reference dataset.</span>
-
-<span class="sd">        train_args:</span>
-<span class="sd">            Further arguments to pass to</span>
-<span class="sd">            :py:func:`~singler.train_single.train_single`.</span>
-
-<span class="sd">        classify_args:</span>
-<span class="sd">            Further arguments to pass to</span>
-<span class="sd">            :py:func:`~singler.classify_single.classify_single`.</span>
+<span class="sd">        fine_tune_threshold:</span>
+<span class="sd">            Maximum difference from the maximum correlation to use in fine-tuning.</span>
+<span class="sd">            All labels above this threshold are used for another round of fine-tuning.</span>
 
 <span class="sd">        num_threads:</span>
-<span class="sd">            Number of threads to use for the various steps.</span>
+<span class="sd">            Number of threads to use during classification.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        A :py:class:`~biocframe.BiocFrame.BiocFrame` of labelling results, see</span>
-<span class="sd">        :py:func:`~singler.classify_single.classify_single` for details.</span>
+<span class="sd">        A :py:class:`~BiocFrame.BiocFrame.BiocFrame` containing the ``best``</span>
+<span class="sd">        label, the ``scores`` for each label as a nested ``BiocFrame``, and the</span>
+<span class="sd">        ``delta`` from the best to the second-best label. Each row corresponds</span>
+<span class="sd">        to a column of ``test``. The metadata contains ``markers``, a list of</span>
+<span class="sd">        the markers from each pairwise comparison between labels; and ``used``,</span>
+<span class="sd">        a list containing the union of markers from all comparisons.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ref_labels</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-            <span class="s2">&quot;setting &#39;ref_labels&#39; to a column name of the column data is deprecated&quot;</span><span class="p">,</span>
-            <span class="n">category</span><span class="o">=</span><span class="ne">DeprecationWarning</span>
-        <span class="p">)</span>
-        <span class="n">ref_labels</span> <span class="o">=</span> <span class="n">ref_data</span><span class="o">.</span><span class="n">get_column_data</span><span class="p">()</span><span class="o">.</span><span class="n">column</span><span class="p">(</span><span class="n">ref_labels</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">test_data</span><span class="p">,</span> <span class="n">summarizedexperiment</span><span class="o">.</span><span class="n">SummarizedExperiment</span><span class="p">):</span>
+        <span class="n">test_data</span> <span class="o">=</span> <span class="n">test_data</span><span class="o">.</span><span class="n">assay</span><span class="p">(</span><span class="n">assay_type</span><span class="p">)</span>
 
-    <span class="n">test_data</span><span class="p">,</span> <span class="n">test_features</span> <span class="o">=</span> <span class="n">_clean_matrix</span><span class="p">(</span>
-        <span class="n">test_data</span><span class="p">,</span>
-        <span class="n">test_features</span><span class="p">,</span>
-        <span class="n">assay_type</span><span class="o">=</span><span class="n">test_assay_type</span><span class="p">,</span>
-        <span class="n">check_missing</span><span class="o">=</span><span class="n">test_check_missing</span><span class="p">,</span>
-        <span class="n">num_threads</span><span class="o">=</span><span class="n">num_threads</span>
+    <span class="k">if</span> <span class="n">test_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">ref_prebuilt</span><span class="o">.</span><span class="n">_test_num_features</span><span class="p">:</span> <span class="c1"># TODO: move to singlepp</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;number of rows in &#39;test_data&#39; is not consistent with &#39;test_features=&#39; used to create &#39;ref_prebuilt&#39;&quot;</span><span class="p">)</span>
+
+    <span class="n">test_ptr</span> <span class="o">=</span> <span class="n">mattress</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="n">test_data</span><span class="p">)</span>
+
+    <span class="n">best</span><span class="p">,</span> <span class="n">raw_scores</span><span class="p">,</span> <span class="n">delta</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">classify_single</span><span class="p">(</span>
+        <span class="n">test_ptr</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span>
+        <span class="n">ref_prebuilt</span><span class="o">.</span><span class="n">_ptr</span><span class="p">,</span>
+        <span class="n">quantile</span><span class="p">,</span>
+        <span class="n">use_fine_tune</span><span class="p">,</span>
+        <span class="n">fine_tune_threshold</span><span class="p">,</span>
+        <span class="n">num_threads</span>
     <span class="p">)</span>
 
-    <span class="n">ref_data</span><span class="p">,</span> <span class="n">ref_features</span> <span class="o">=</span> <span class="n">_clean_matrix</span><span class="p">(</span>
-        <span class="n">ref_data</span><span class="p">,</span>
-        <span class="n">ref_features</span><span class="p">,</span>
-        <span class="n">assay_type</span><span class="o">=</span><span class="n">ref_assay_type</span><span class="p">,</span>
-        <span class="n">check_missing</span><span class="o">=</span><span class="n">ref_check_missing</span><span class="p">,</span>
-        <span class="n">num_threads</span><span class="o">=</span><span class="n">num_threads</span>
-    <span class="p">)</span>
+    <span class="n">all_labels</span> <span class="o">=</span> <span class="n">ref_prebuilt</span><span class="o">.</span><span class="n">labels</span>
+    <span class="n">scores</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">all_labels</span><span class="p">):</span>
+        <span class="n">scores</span><span class="p">[</span><span class="n">l</span><span class="p">]</span> <span class="o">=</span> <span class="n">raw_scores</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="n">scores_df</span> <span class="o">=</span> <span class="n">biocframe</span><span class="o">.</span><span class="n">BiocFrame</span><span class="p">(</span><span class="n">scores</span><span class="p">,</span> <span class="n">number_of_rows</span><span class="o">=</span><span class="n">test_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">column_names</span><span class="o">=</span><span class="n">all_labels</span><span class="p">)</span>
 
-    <span class="c1"># Pre-slicing the test dataset for consistency with annotate_integrated.</span>
-    <span class="n">test_data</span><span class="p">,</span> <span class="n">test_features</span> <span class="o">=</span> <span class="n">_restrict_features</span><span class="p">(</span>
-        <span class="n">test_data</span><span class="p">,</span>
-        <span class="n">test_features</span><span class="p">,</span>
-        <span class="n">ref_features</span>
-    <span class="p">)</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">biocframe</span><span class="o">.</span><span class="n">BiocFrame</span><span class="p">({</span>
+        <span class="s2">&quot;best&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">all_labels</span><span class="p">[</span><span class="n">b</span><span class="p">]</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">best</span><span class="p">],</span> 
+        <span class="s2">&quot;scores&quot;</span><span class="p">:</span> <span class="n">scores_df</span><span class="p">,</span> 
+        <span class="s2">&quot;delta&quot;</span><span class="p">:</span> <span class="n">delta</span>
+    <span class="p">})</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">output</span><span class="o">.</span><span class="n">set_metadata</span><span class="p">({</span>
+        <span class="s2">&quot;used&quot;</span><span class="p">:</span> <span class="n">ref_prebuilt</span><span class="o">.</span><span class="n">marker_subset</span><span class="p">(),</span>
+        <span class="s2">&quot;markers&quot;</span><span class="p">:</span> <span class="n">ref_prebuilt</span><span class="o">.</span><span class="n">markers</span><span class="p">,</span>
+    <span class="p">})</span>
 
-    <span class="n">built</span> <span class="o">=</span> <span class="n">train_single</span><span class="p">(</span>
-        <span class="n">ref_data</span><span class="o">=</span><span class="n">ref_data</span><span class="p">,</span>
-        <span class="n">ref_labels</span><span class="o">=</span><span class="n">ref_labels</span><span class="p">,</span>
-        <span class="n">ref_features</span><span class="o">=</span><span class="n">ref_features</span><span class="p">,</span>
-        <span class="n">test_features</span><span class="o">=</span><span class="n">test_features</span><span class="p">,</span>
-        <span class="n">check_missing</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">num_threads</span><span class="o">=</span><span class="n">num_threads</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">train_args</span><span class="p">,</span>
-    <span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">classify_single</span><span class="p">(</span>
-        <span class="n">test_data</span><span class="p">,</span>
-        <span class="n">ref_prebuilt</span><span class="o">=</span><span class="n">built</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">classify_args</span><span class="p">,</span>
-        <span class="n">num_threads</span><span class="o">=</span><span class="n">num_threads</span><span class="p">,</span>
-    <span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">output</span></div>
 
 </pre></div>
         </article>
