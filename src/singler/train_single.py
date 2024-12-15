@@ -105,7 +105,6 @@ def train_single(
     marker_method: Literal["classic"] = "classic",
     marker_args: dict = {},
     nn_parameters: Optional[knncolle.Parameters] = knncolle.VptreeParameters(),
-    check_duplicated: bool = True,
     num_threads: int = 1,
 ) -> TrainedSingleReference:
     """Build a single reference dataset in preparation for classification.
@@ -167,10 +166,6 @@ def train_single(
             Algorithm for constructing the neighbor search index, used to
             compute scores during classification.
 
-        check_duplicated:
-            Whether to remove rows with duplicate feature names. This can be
-            set to False if ``ref_features`` does not contain any duplicates.
-
         num_threads:
             Number of threads to use for reference building.
 
@@ -193,20 +188,24 @@ def train_single(
         num_threads=num_threads,
     )
 
-    if check_duplicated:
+    if len(set(ref_features)) != len(ref_features):
         encountered = set()
         keep = []
         for i, rg in enumerate(ref_features):
             if rg not in encountered:
                 encountered.add(rg)
                 keep.append(i)
-        if len(keep) != len(ref_features):
+        if len(keep) < len(ref_features):
             ref_features = biocutils.subset_sequence(ref_features, keep)
             ref_data = delayedarray.DelayedArray(ref_data)[keep,:]
 
-    for f in ref_labels:
-        if f is None:
-            raise ValueError("entries of 'ref_labels' cannot be missing")
+    if None in ref_labels:
+        keep = []
+        for i, f in enumerate(ref_labels):
+            if not f is None:
+                keep.append(i)
+        ref_data = delayedarray.DelayedArray(ref_data)[:,keep]
+        ref_labels = biocutils.subset_sequence(ref_labels, keep)
     ref_labels = biocutils.Factor.from_sequence(ref_labels, sort_levels=True) # TODO: add a dtype= option.
     unique_labels = ref_labels.levels
     label_idx = ref_labels.codes.astype(dtype=numpy.uint32, copy=False)

@@ -44,8 +44,20 @@ def test_train_single_dedup():
     features = [str(i) for i in range(ref.shape[0])]
     features[0] = "1"
     built = singler.train_single(ref, labels, features)
+
     assert built.features == features[1:] # duplicates are ignored
     assert built._full_data.shape[0] == len(built.features)
+    assert (built._full_data[0, :] == ref[0, :]).all()
+    assert (built._full_data[1, :] == ref[2, :]).all()
+
+
+def test_train_single_missing_label():
+    ref = numpy.random.rand(10000, 10)
+    labels = ["A", "B", "C", "D", None, "E", "D", "C", "B", "A"]
+    features = [str(i) for i in range(ref.shape[0])]
+    built = singler.train_single(ref, labels, features)
+    assert built._full_data.shape[1] == len(labels) - 1
+    assert (built._full_data[0,:] == ref[0,[0,1,2,3,5,6,7,8,9]]).all()
 
 
 def test_train_single_restricted():
