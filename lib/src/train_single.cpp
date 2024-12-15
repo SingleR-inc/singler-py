@@ -21,11 +21,13 @@ TrainedSingleIntersectPointer train_single(
     int nthreads)
 {
     const auto& ref = mattress::cast(ref_ptr)->ptr;
-    const auto& builder = knncolle_py::cast_builder(builder_ptr)->ptr;
 
-    singlepp::TrainSingleOptions<mattress::MatrixIndex, mattress::MatrixValue> opts;
+    singlepp::TrainSingleOptions<knncolle_py::Index, knncolle_py::MatrixValue> opts;
     opts.num_threads = nthreads;
     opts.top = -1; // Use all available markers; assume subsetting was applied on the Python side.
+
+    const auto& builder = knncolle_py::cast_builder(builder_ptr)->ptr;
+    typedef std::shared_ptr<knncolle::Builder<knncolle_py::SimpleMatrix, knncolle_py::Distance> > BuilderPointer;
     opts.trainer = BuilderPointer(BuilderPointer{}, builder.get()); // make a no-op shared pointer.
 
     auto NR = ref->nrow();
