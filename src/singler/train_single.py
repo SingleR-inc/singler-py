@@ -104,7 +104,7 @@ def train_single(
     markers: Optional[dict[Any, dict[Any, Sequence]]] = None,
     marker_method: Literal["classic"] = "classic",
     marker_args: dict = {},
-    nn_parameters: Optional[knncolle.Parameters] = knncolle.AnnoyParameters(),
+    nn_parameters: Optional[knncolle.Parameters] = knncolle.VptreeParameters(),
     check_duplicated: bool = True,
     num_threads: int = 1,
 ) -> TrainedSingleReference:
