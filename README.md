@@ -11,13 +11,13 @@
 [![Project generated with PyScaffold](https://img.shields.io/badge/-PyScaffold-005CA0?logo=pyscaffold)](https://pyscaffold.org/)
 [![PyPI-Server](https://img.shields.io/pypi/v/singler.svg)](https://pypi.org/project/singler/)
 [![Monthly Downloads](https://static.pepy.tech/badge/singler/month)](https://pepy.tech/project/singler)
-![Unit tests](https://github.com/BiocPy/singler/actions/workflows/pypi-test.yml/badge.svg)
+![Unit tests](https://github.com/SingleR-inc/singler-py/actions/workflows/pypi-test.yml/badge.svg)
 
 # Tinder for single-cell data
 
 ## Overview
 
-This package provides Python bindings to the [C++ implementation](https://github.com/SingleR-inc/singlepp) of the [SingleR algorithm](https://github.com/SingleR-inc/SingleR),
+This package provides Python bindings to the [C++ implementation](https://github.com/SingleR-inc/singlepp) of the [SingleR method](https://github.com/SingleR-inc/SingleR),
 originally developed by [Aran et al. (2019)](https://www.nature.com/articles/s41590-018-0276-y).
 It is designed to annotate cell types by matching cells to known references based on their expression profiles.
 So kind of like Tinder, but for cells.
