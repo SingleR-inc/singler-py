@@ -22,7 +22,7 @@ def test_train_integrated():
     )
 
     assert list(integrated.reference_labels[0]) == ["A", "B", "C", "D", "E"]
-    assert list(integrated.reference_labels[1]) == ["z", "y", "x"]
+    assert list(integrated.reference_labels[1]) == ["x", "y", "z"]
 
     # Works in parallel.
     pintegrated = singler.train_integrated(
