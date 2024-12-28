@@ -34,7 +34,6 @@ class TrainedSingleReference:
         self._features = features
         self._labels = labels
         self._markers = markers
-        self._test_num_features = test_num_features # TODO: move to singlepp.
 
     def num_markers(self) -> int:
         """

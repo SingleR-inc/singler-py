@@ -66,9 +66,6 @@ def classify_single(
     if isinstance(test_data, summarizedexperiment.SummarizedExperiment):
         test_data = test_data.assay(assay_type)
 
-    if test_data.shape[0] != ref_prebuilt._test_num_features: # TODO: move to singlepp
-        raise ValueError("number of rows in 'test_data' is not consistent with 'test_features=' used to create 'ref_prebuilt'")
-
     test_ptr = mattress.initialize(test_data)
 
     best, raw_scores, delta = lib.classify_single(

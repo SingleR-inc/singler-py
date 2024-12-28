@@ -77,9 +77,6 @@ def classify_integrated(
     if isinstance(test_data, summarizedexperiment.SummarizedExperiment):
         test_data = test_data.assay(assay_type)
 
-    if test_data.shape[0] != integrated_prebuilt._test_num_features: # TODO: move to singlepp.
-        raise ValueError("number of rows in 'test_data' is not consistent with 'test_features=' used to create 'integrated_prebuilt'")
-
     ref_labs = integrated_prebuilt.reference_labels
     if len(results) != len(ref_labs):
         raise ValueError("length of 'results' should equal the number of references")

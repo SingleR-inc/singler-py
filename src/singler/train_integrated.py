@@ -17,7 +17,6 @@ class TrainedIntegratedReferences:
     def __init__(self, ptr: int, ref_labels: list, test_num_features: int):
         self._ptr = ptr
         self._labels = ref_labels
-        self._test_num_features = test_num_features # TODO: move to singlepp.
 
     @property
     def reference_labels(self) -> list:
