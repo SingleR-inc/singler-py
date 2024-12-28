@@ -205,9 +205,7 @@ def train_single(
                 keep.append(i)
         ref_data = delayedarray.DelayedArray(ref_data)[:,keep]
         ref_labels = biocutils.subset_sequence(ref_labels, keep)
-    ref_labels = biocutils.Factor.from_sequence(ref_labels, sort_levels=True) # TODO: add a dtype= option.
-    unique_labels = ref_labels.levels
-    label_idx = ref_labels.codes.astype(dtype=numpy.uint32, copy=False)
+    unique_labels, label_idx = biocutils.factorize(ref_labels, sort_levels=True, dtype=numpy.uint32, fail_missing=True)
 
     markers = _identify_genes(
         ref_data=ref_data, 

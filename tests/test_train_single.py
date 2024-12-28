@@ -12,7 +12,7 @@ def test_train_single_basic():
     assert built.num_labels() == 5
     assert built.num_markers() < len(features)
     assert built.features == features
-    assert built.labels.as_list() == ["A", "B", "C", "D", "E"]
+    assert built.labels == ["A", "B", "C", "D", "E"]
 
     all_markers = built.marker_subset()
     assert len(all_markers) == built.num_markers()
