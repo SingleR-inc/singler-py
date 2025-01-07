@@ -58,7 +58,7 @@ def test_aggregate_reference_noop():
     features = ["gene_" + str(i) for i in range(ref.shape[0])]
     aggr = singler.aggregate_reference(ref, labels, features, power=1)
     assert aggr.get_column_data().get_column("label") == sorted(labels)
-    assert (ref == aggr.assay(0)[:,numpy.argsort(labels, stable=True)]).all()
+    assert (aggr.assay(0) == ref[:,numpy.argsort(labels, stable=True)]).all()
 
 
 def test_aggregate_reference_skip():

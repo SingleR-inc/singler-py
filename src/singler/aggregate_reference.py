@@ -116,13 +116,8 @@ def aggregate_reference(
                 pcs = subcurrent
 
             clustered = scranpy.cluster_kmeans(pcs, k=cur_num_centers, num_threads=num_threads)
-            print("C", current[0,:])
-            print("C++", current[10,:])
-            print(clustered.clusters)
             agg = scranpy.aggregate_across_cells(current, [clustered.clusters], num_threads=num_threads)
             output = agg.sum / agg.counts
-            print("A", agg.sum[0,:])
-            print("A++", agg.sum[10,:])
 
         output_vals.append(output)
         output_labels += [lab] * output.shape[1]
