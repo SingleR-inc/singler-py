@@ -23,3 +23,4 @@ from .annotate_single import annotate_single
 from .train_integrated import train_integrated, TrainedIntegratedReferences
 from .classify_integrated import classify_integrated
 from .annotate_integrated import annotate_integrated
+from .aggregate_reference import aggregate_reference
