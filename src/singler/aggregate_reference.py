@@ -111,7 +111,7 @@ def aggregate_reference(
             subcurrent = subcurrent[keep,:]
 
             if rank <= min(subcurrent.shape)-1:
-                pcs = scrapper.run_pca(subcurrent, number=rank, num_threads=num_threads).components
+                pcs = scranpy.run_pca(subcurrent, number=rank, num_threads=num_threads).components
             else:
                 pcs = subcurrent
 
