@@ -6,7 +6,7 @@
 
     <!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
         <title>singler.classify_integrated - singler unknown documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=302659d7" />
     
@@ -242,21 +242,21 @@
         </div>
         <article role="main" id="furo-main-content">
           <h1>Source code for singler.classify_integrated</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Union</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Union</span>
 
-<span class="kn">import</span> <span class="nn">biocutils</span>
-<span class="kn">import</span> <span class="nn">biocframe</span> 
-<span class="kn">import</span> <span class="nn">mattress</span>
-<span class="kn">import</span> <span class="nn">summarizedexperiment</span>
-<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">biocutils</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">biocframe</span> 
+<span class="kn">import</span><span class="w"> </span><span class="nn">mattress</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">summarizedexperiment</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
 
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">lib_singler</span> <span class="k">as</span> <span class="n">lib</span>
-<span class="kn">from</span> <span class="nn">.train_integrated</span> <span class="kn">import</span> <span class="n">TrainedIntegratedReferences</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">lib_singler</span> <span class="k">as</span> <span class="n">lib</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.train_integrated</span><span class="w"> </span><span class="kn">import</span> <span class="n">TrainedIntegratedReferences</span>
 
 
 <div class="viewcode-block" id="classify_integrated">
 <a class="viewcode-back" href="../../api/singler.html#singler.classify_integrated.classify_integrated">[docs]</a>
-<span class="k">def</span> <span class="nf">classify_integrated</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">classify_integrated</span><span class="p">(</span>
     <span class="n">test_data</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
     <span class="n">results</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">biocframe</span><span class="o">.</span><span class="n">BiocFrame</span><span class="p">],</span>
     <span class="n">integrated_prebuilt</span><span class="p">:</span> <span class="n">TrainedIntegratedReferences</span><span class="p">,</span>
@@ -322,9 +322,6 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">test_data</span><span class="p">,</span> <span class="n">summarizedexperiment</span><span class="o">.</span><span class="n">SummarizedExperiment</span><span class="p">):</span>
         <span class="n">test_data</span> <span class="o">=</span> <span class="n">test_data</span><span class="o">.</span><span class="n">assay</span><span class="p">(</span><span class="n">assay_type</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">test_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">integrated_prebuilt</span><span class="o">.</span><span class="n">_test_num_features</span><span class="p">:</span> <span class="c1"># TODO: move to singlepp.</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;number of rows in &#39;test_data&#39; is not consistent with &#39;test_features=&#39; used to create &#39;integrated_prebuilt&#39;&quot;</span><span class="p">)</span>
 
     <span class="n">ref_labs</span> <span class="o">=</span> <span class="n">integrated_prebuilt</span><span class="o">.</span><span class="n">reference_labels</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ref_labs</span><span class="p">):</span>

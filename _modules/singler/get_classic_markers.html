@@ -6,7 +6,7 @@
 
     <!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
         <title>singler.get_classic_markers - singler unknown documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=302659d7" />
     
@@ -242,15 +242,15 @@
         </div>
         <article role="main" id="furo-main-content">
           <h1>Source code for singler.get_classic_markers</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Union</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Union</span>
 
-<span class="kn">import</span> <span class="nn">delayedarray</span>
-<span class="kn">import</span> <span class="nn">mattress</span>
-<span class="kn">import</span> <span class="nn">numpy</span>
-<span class="kn">import</span> <span class="nn">biocutils</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">delayedarray</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">mattress</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">biocutils</span>
 
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">lib_singler</span> <span class="k">as</span> <span class="n">lib</span>
-<span class="kn">from</span> <span class="nn">._utils</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">lib_singler</span> <span class="k">as</span> <span class="n">lib</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">._utils</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">_clean_matrix</span><span class="p">,</span>
     <span class="n">_create_map</span><span class="p">,</span>
     <span class="n">_stable_intersect</span><span class="p">,</span>
@@ -258,7 +258,7 @@
 <span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">_get_classic_markers_raw</span><span class="p">(</span><span class="n">ref_ptrs</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">ref_labels</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">ref_features</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">num_de</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_threads</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_classic_markers_raw</span><span class="p">(</span><span class="n">ref_ptrs</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">ref_labels</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">ref_features</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">num_de</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_threads</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
     <span class="n">nrefs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ref_ptrs</span><span class="p">)</span>
 
     <span class="c1"># We assume that ref_ptrs and ref_features contains the outputs of</span>
@@ -334,7 +334,7 @@
 
 <div class="viewcode-block" id="get_classic_markers">
 <a class="viewcode-back" href="../../api/singler.html#singler.get_classic_markers.get_classic_markers">[docs]</a>
-<span class="k">def</span> <span class="nf">get_classic_markers</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_classic_markers</span><span class="p">(</span>
     <span class="n">ref_data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
     <span class="n">ref_labels</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Sequence</span><span class="p">]],</span>
     <span class="n">ref_features</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Sequence</span><span class="p">]],</span>
@@ -446,7 +446,7 @@
 
 <div class="viewcode-block" id="number_of_classic_markers">
 <a class="viewcode-back" href="../../api/singler.html#singler.get_classic_markers.number_of_classic_markers">[docs]</a>
-<span class="k">def</span> <span class="nf">number_of_classic_markers</span><span class="p">(</span><span class="n">num_labels</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">number_of_classic_markers</span><span class="p">(</span><span class="n">num_labels</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the number of markers to detect for a given number of labels,</span>
 <span class="sd">    using the classic SingleR marker detection algorithm.</span>
 

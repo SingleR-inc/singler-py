@@ -9,6 +9,14 @@ singler package
 Submodules
 ----------
 
+singler.aggregate\_reference module
+-----------------------------------
+
+.. automodule:: singler.aggregate_reference
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 singler.annotate\_integrated module
 -----------------------------------
 

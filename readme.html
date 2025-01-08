@@ -7,7 +7,7 @@
 
     <!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
         <title>Tinder for single-cell data - singler unknown documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=302659d7" />
     
@@ -273,7 +273,7 @@ So kind of like Tinder, but for cells.</p>
 <section id="quick-start">
 <h2>Quick start<a class="headerlink" href="#quick-start" title="Link to this heading">¶</a></h2>
 <p>Firstly, let’s load in the famous PBMC 4k dataset from 10X Genomics:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">singlecellexperiment</span> <span class="k">as</span> <span class="nn">sce</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">singlecellexperiment</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sce</span>
 <span class="n">data</span> <span class="o">=</span> <span class="n">sce</span><span class="o">.</span><span class="n">read_tenx_h5</span><span class="p">(</span><span class="s2">&quot;pbmc4k-tenx.h5&quot;</span><span class="p">,</span> <span class="n">realize_assays</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">mat</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">assay</span><span class="p">(</span><span class="s2">&quot;counts&quot;</span><span class="p">)</span>
 <span class="n">features</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">row_data</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]]</span>
@@ -281,7 +281,7 @@ So kind of like Tinder, but for cells.</p>
 </div>
 <p>or if you are coming from scverse ecosystem, i.e. <code class="docutils literal notranslate"><span class="pre">AnnData</span></code>, simply read the object as <code class="docutils literal notranslate"><span class="pre">SingleCellExperiment</span></code> and extract the matrix and the features.
 Read more on <a class="reference external" href="https://biocpy.github.io/tutorial/chapters/experiments/single_cell_experiment.html">SingleCellExperiment here</a>.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">singlecellexperiment</span> <span class="k">as</span> <span class="nn">sce</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">singlecellexperiment</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sce</span>
 
 <span class="n">sce_adata</span> <span class="o">=</span> <span class="n">sce</span><span class="o">.</span><span class="n">SingleCellExperiment</span><span class="o">.</span><span class="n">from_anndata</span><span class="p">(</span><span class="n">adata</span><span class="p">)</span> 
 
@@ -290,13 +290,13 @@ Read more on <a class="reference external" href="https://biocpy.github.io/tutori
 </pre></div>
 </div>
 <p>Now, we fetch the Blueprint/ENCODE reference:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">celldex</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">celldex</span>
 
 <span class="n">ref_data</span> <span class="o">=</span> <span class="n">celldex</span><span class="o">.</span><span class="n">fetch_reference</span><span class="p">(</span><span class="s2">&quot;blueprint_encode&quot;</span><span class="p">,</span> <span class="s2">&quot;2024-02-26&quot;</span><span class="p">,</span> <span class="n">realize_assays</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>We can annotate each cell in <code class="docutils literal notranslate"><span class="pre">mat</span></code> with the reference:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">singler</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">singler</span>
 <span class="n">results</span> <span class="o">=</span> <span class="n">singler</span><span class="o">.</span><span class="n">annotate_single</span><span class="p">(</span>
     <span class="n">test_data</span> <span class="o">=</span> <span class="n">mat</span><span class="p">,</span>
     <span class="n">test_features</span> <span class="o">=</span> <span class="n">features</span><span class="p">,</span>
@@ -360,8 +360,8 @@ BiocFrame with 4340 rows and 3 columns
 <section id="integrating-labels-across-references">
 <h2>Integrating labels across references<a class="headerlink" href="#integrating-labels-across-references" title="Link to this heading">¶</a></h2>
 <p>We can use annotations from multiple references through the <code class="docutils literal notranslate"><span class="pre">annotate_integrated()</span></code> function:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">singler</span>
-<span class="kn">import</span> <span class="nn">celldex</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">singler</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">celldex</span>
 
 <span class="n">blueprint_ref</span> <span class="o">=</span> <span class="n">celldex</span><span class="o">.</span><span class="n">fetch_reference</span><span class="p">(</span><span class="s2">&quot;blueprint_encode&quot;</span><span class="p">,</span> <span class="s2">&quot;2024-02-26&quot;</span><span class="p">,</span> <span class="n">realize_assays</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">immune_cell_ref</span> <span class="o">=</span> <span class="n">celldex</span><span class="o">.</span><span class="n">fetch_reference</span><span class="p">(</span><span class="s2">&quot;dice&quot;</span><span class="p">,</span> <span class="s2">&quot;2024-02-26&quot;</span><span class="p">,</span> <span class="n">realize_assays</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>

@@ -6,7 +6,7 @@
 
     <!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
         <title>singler.annotate_integrated - singler unknown documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=302659d7" />
     
@@ -242,21 +242,21 @@
         </div>
         <article role="main" id="furo-main-content">
           <h1>Source code for singler.annotate_integrated</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 
-<span class="kn">import</span> <span class="nn">biocframe</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">biocframe</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 
-<span class="kn">from</span> <span class="nn">._utils</span> <span class="kn">import</span> <span class="n">_clean_matrix</span><span class="p">,</span> <span class="n">_restrict_features</span>
-<span class="kn">from</span> <span class="nn">.train_single</span> <span class="kn">import</span> <span class="n">train_single</span>
-<span class="kn">from</span> <span class="nn">.train_integrated</span> <span class="kn">import</span> <span class="n">train_integrated</span>
-<span class="kn">from</span> <span class="nn">.classify_single</span> <span class="kn">import</span> <span class="n">classify_single</span>
-<span class="kn">from</span> <span class="nn">.classify_integrated</span> <span class="kn">import</span> <span class="n">classify_integrated</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">._utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">_clean_matrix</span><span class="p">,</span> <span class="n">_restrict_features</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.train_single</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_single</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.train_integrated</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_integrated</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.classify_single</span><span class="w"> </span><span class="kn">import</span> <span class="n">classify_single</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.classify_integrated</span><span class="w"> </span><span class="kn">import</span> <span class="n">classify_integrated</span>
 
 
 <div class="viewcode-block" id="annotate_integrated">
 <a class="viewcode-back" href="../../api/singler.html#singler.annotate_integrated.annotate_integrated">[docs]</a>
-<span class="k">def</span> <span class="nf">annotate_integrated</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">annotate_integrated</span><span class="p">(</span>
     <span class="n">test_data</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
     <span class="n">ref_data</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">,</span>
     <span class="n">ref_labels</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Sequence</span><span class="p">],</span>
