@@ -33,6 +33,19 @@ def test_annotate_single_sanity():
     assert output.shape[0] == 5
     assert output.column("best") == ["B", "D", "A", "E", "C"]
 
+    # Works correctly with aggregation.
+    output = singler.annotate_single(
+        test,
+        test_features=all_features,
+        ref_data=ref,
+        ref_features=all_features,
+        ref_labels=labels,
+        train_args = { "aggregate": True }
+    )
+
+    assert output.shape[0] == 5
+    assert output.column("best") == ["B", "D", "A", "E", "C"]
+
     # To mix it up a little, we're going to be taking every 2nd element of the
     # ref and every 3rd element of the test, just to make sure that the slicing
     # works as expected.

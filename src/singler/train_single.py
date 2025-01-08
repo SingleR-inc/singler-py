@@ -10,6 +10,7 @@ import warnings
 from . import lib_singler as lib
 from ._utils import _clean_matrix, _restrict_features, _stable_intersect
 from .get_classic_markers import get_classic_markers
+from .aggregate_reference import aggregate_reference
 
 
 class TrainedSingleReference:
@@ -104,6 +105,8 @@ def train_single(
     marker_method: Literal["classic", "auc", "cohens_d"] = "classic",
     num_de: Optional[int] = None,
     marker_args: dict = {},
+    aggregate: bool = False,
+    aggregate_args: dict = {},
     nn_parameters: Optional[knncolle.Parameters] = knncolle.VptreeParameters(),
     num_threads: int = 1,
 ) -> TrainedSingleReference:
@@ -168,6 +171,12 @@ def train_single(
             Further arguments to pass to the chosen marker detection method.
             If ``marker_method = "classic"``, this is :py:func:`~singler.get_classic_markers.get_classic_markers`, otherwise it is :py:func:`~scranpy.score_markers.score_markers`.
             Only used if ``markers`` is not supplied.
+
+        aggregate:
+            Whether the reference dataset should be aggregated to pseudo-bulk samples for speed, see :py:func:`~singler.aggregate_reference.aggregate_reference` for details.
+
+        aggregate_args:
+            Further arguments to pass to :py:func:`~singler.aggregate_reference.aggregate_reference` when ``aggregate = True``.
 
         nn_parameters:
             Algorithm for constructing the neighbor search index, used to
@@ -245,6 +254,11 @@ def train_single(
         test_features_idx = biocutils.match(common_features, test_features, dtype=numpy.uint32)
         ref_features_idx = biocutils.match(common_features, ref_features, dtype=numpy.uint32)
         test_num_features = len(test_features)
+
+    if aggregate:
+        aggr = aggregate_reference(ref_data, ref_labels, ref_features, **aggregate_args)
+        ref_data = aggr.assay(0)
+        label_idx = biocutils.match(aggr.get_column_data().get_column("label"), unique_labels, dtype=numpy.uint32)
 
     ref_ptr = mattress.initialize(ref_data)
     builder, _ = knncolle.define_builder(nn_parameters)

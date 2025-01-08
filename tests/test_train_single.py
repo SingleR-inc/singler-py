@@ -146,3 +146,18 @@ def test_train_single_scranpy():
         right = markerref[:,[n2 == l for l in labels]].mean(axis=1)
         assert (left > right + 1).all()
     verify(built.markers, effects.cohens_d, 0, extra=extra_cohen)
+
+
+def test_train_single_aggregate():
+    ref = numpy.random.rand(10000, 1000)
+    labels = ["A", "B", "C", "D"] * 250
+    features = ["gene_" + str(i) for i in range(ref.shape[0])]
+
+    built = singler.train_single(ref, labels, features)
+    aggr = singler.train_single(ref, labels, features, aggregate=True)
+    assert aggr.markers == built.markers
+    assert aggr.labels == built.labels
+    assert aggr.features == built.features
+    assert aggr.marker_subset() == built.marker_subset()
+    assert aggr._full_data.shape[0] == built._full_data.shape[0]
+    assert aggr._full_data.shape[1] < built._full_data.shape[1]
