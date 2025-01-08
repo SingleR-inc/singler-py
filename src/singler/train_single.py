@@ -27,7 +27,6 @@ class TrainedSingleReference:
         labels: Sequence,
         features: Sequence,
         markers: dict[Any, dict[Any, Sequence]],
-        test_num_features: int,
     ):
         self._ptr = ptr
         self._full_data = full_data
@@ -248,12 +247,10 @@ def train_single(
     if test_features is None:
         test_features_idx = numpy.array(range(len(ref_features)), dtype=numpy.uint32)
         ref_features_idx = numpy.array(range(len(ref_features)), dtype=numpy.uint32)
-        test_num_features = len(ref_features)
     else:
         common_features = _stable_intersect(test_features, ref_features)
         test_features_idx = biocutils.match(common_features, test_features, dtype=numpy.uint32)
         ref_features_idx = biocutils.match(common_features, ref_features, dtype=numpy.uint32)
-        test_num_features = len(test_features)
 
     if aggregate:
         aggr = aggregate_reference(ref_data, ref_labels, ref_features, **aggregate_args)
@@ -277,7 +274,6 @@ def train_single(
         labels = unique_labels,
         features = ref_features,
         markers = markers,
-        test_num_features = test_num_features,
     )
 
 

@@ -14,7 +14,7 @@ class TrainedIntegratedReferences:
     """Object containing integrated references, typically constructed by
     :py:meth:`~singler.train_integrated.train_integrated`."""
 
-    def __init__(self, ptr: int, ref_labels: list, test_num_features: int):
+    def __init__(self, ptr: int, ref_labels: list):
         self._ptr = ptr
         self._labels = ref_labels
 
@@ -86,5 +86,4 @@ def train_integrated(
     return TrainedIntegratedReferences(
         ptr=ibuilt,
         ref_labels=[x.labels for x in ref_prebuilt],
-        test_num_features = len(test_features),
     )
