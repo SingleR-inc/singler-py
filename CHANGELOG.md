@@ -1,5 +1,11 @@
 # Changelog
 
+## Version 0.4.1
+
+- Added the `aggregate_reference()` function to aggregate references for speed.
+  This is conveniently used via the `aggregate=` option in `train_single()`.
+- Extend `train_single()` to support marker detection using **scrapper** to compute Cohen's d or the AUC of each pairwise comparison.
+
 ## Version 0.4.0
 
 - Switch to using **pybind11** for the Python/C++ interface.
