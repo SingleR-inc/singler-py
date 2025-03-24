@@ -134,7 +134,6 @@ immune_cell_ref = celldex.fetch_reference("dice", "2024-02-26", realize_assays=T
 
 single_results, integrated = singler.annotate_integrated(
     mat,
-    features,
     ref_data = [
         blueprint_ref,
         immune_cell_ref
@@ -143,6 +142,7 @@ single_results, integrated = singler.annotate_integrated(
         blueprint_ref.get_column_data().column("label.main"),
         immune_cell_ref.get_column_data().column("label.main")
     ],
+    test_features = features,
     num_threads = 6
 )
 ```
