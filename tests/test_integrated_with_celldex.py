@@ -1,11 +1,8 @@
-import singler
-import numpy
 import celldex
 import scrnaseq
-import pandas as pd
-import scipy
-import pytest
 from biocframe import BiocFrame
+
+import singler
 
 
 def test_with_minimal_args():

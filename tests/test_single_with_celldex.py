@@ -1,10 +1,16 @@
 import singler
-import numpy
 import celldex
 import scrnaseq
-import pandas as pd
-import scipy
 from biocframe import BiocFrame
+
+def value_counts(data):
+    counts = {}
+    for item in data:
+        if item in counts:
+            counts[item] += 1
+        else:
+            counts[item] = 1
+    return counts
 
 def test_with_minimal_args():
     sce = scrnaseq.fetch_dataset("zeisel-brain-2015", "2023-12-14", realize_assays=True)
@@ -17,7 +23,7 @@ def test_with_minimal_args():
     )
     assert isinstance(matches, BiocFrame)
 
-    counts = pd.Series(matches["best"]).value_counts()
+    counts = value_counts(matches["best"])
     assert counts is not None
 
 
@@ -34,7 +40,7 @@ def test_with_all_supplied():
     )
     assert isinstance(matches, BiocFrame)
 
-    counts = pd.Series(matches["best"]).value_counts()
+    counts = value_counts(matches["best"])
     assert counts is not None
 
 
@@ -49,5 +55,5 @@ def test_with_colname():
     )
     assert isinstance(matches, BiocFrame)
 
-    counts = pd.Series(matches["best"]).value_counts()
+    counts = value_counts(matches["best"])
     assert counts is not None
