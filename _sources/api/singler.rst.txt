@@ -3,8 +3,8 @@ singler package
 
 .. automodule:: singler
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Submodules
 ----------
@@ -14,61 +14,61 @@ singler.aggregate\_reference module
 
 .. automodule:: singler.aggregate_reference
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 singler.annotate\_integrated module
 -----------------------------------
 
 .. automodule:: singler.annotate_integrated
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 singler.annotate\_single module
 -------------------------------
 
 .. automodule:: singler.annotate_single
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 singler.classify\_integrated module
 -----------------------------------
 
 .. automodule:: singler.classify_integrated
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 singler.classify\_single module
 -------------------------------
 
 .. automodule:: singler.classify_single
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 singler.get\_classic\_markers module
 ------------------------------------
 
 .. automodule:: singler.get_classic_markers
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 singler.train\_integrated module
 --------------------------------
 
 .. automodule:: singler.train_integrated
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 singler.train\_single module
 ----------------------------
 
 .. automodule:: singler.train_single
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
