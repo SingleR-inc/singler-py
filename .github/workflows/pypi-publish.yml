@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - "*"
+  pull_request:
 
 jobs:
   build_wheels:
@@ -52,19 +53,19 @@ jobs:
           name: cibw-sdist
           path: dist/*.tar.gz
 
-  upload_pypi:
-    needs: [build_wheels, build_sdist]
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write
+  # upload_pypi:
+  #   needs: [build_wheels, build_sdist]
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     id-token: write
 
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          pattern: cibw-*
-          path: dist
-          merge-multiple: true
+  #   steps:
+  #     - uses: actions/download-artifact@v4
+  #       with:
+  #         pattern: cibw-*
+  #         path: dist
+  #         merge-multiple: true
 
-      # This uses the trusted publisher workflow so no token is required.
-      - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
+  #     # This uses the trusted publisher workflow so no token is required.
+  #     - name: Publish to PyPI
+  #       uses: pypa/gh-action-pypi-publish@release/v1
