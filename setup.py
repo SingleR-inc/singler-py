@@ -57,10 +57,11 @@ class build_ext(build_ext_orig):
             if os.name == "nt":
                 cmd += ["--config", "Release"]
             self.spawn(cmd)
+            
             if os.name == "nt": 
-                # Gave up trying to get MSVC to respect the output directory.
-                # Delvewheel also needs it to have a 'pyd' suffix... whatever.
-                shutil.copyfile(os.path.join(build_temp, "Release", "_core.dll"), os.path.join(outpath, "_core.pyd"))
+                src_path = os.path.join(build_temp, "Release", "lib_singler.pyd")
+                dst_path = os.path.join(outpath, "lib_singler.pyd")
+                shutil.copyfile(src_path, dst_path)
 
 
 if __name__ == "__main__":
