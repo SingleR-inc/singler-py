@@ -155,7 +155,16 @@ def get_classic_markers(
         A dictionary of dictionary of lists containing the markers for each
         pairwise comparison between labels, i.e., ``markers[a][b]`` contains
         the upregulated markers for label ``a`` over label ``b``.
+
+    Examples:
+        >>> import singler
+        >>> ref = singler.mock_reference_data()
+        >>> import scranpy
+        >>> ref = scranpy.normalize_rna_counts_se(ref)
+        >>> classical = singler.get_classic_markers(ref, ref.get_column_data()["label"], ref.get_row_names())
+        >>> classical["A"]["B"]
     """
+
     if not isinstance(ref_data, list):
         ref_data = [ref_data]
         ref_labels = [ref_labels]
@@ -202,9 +211,14 @@ def number_of_classic_markers(num_labels: int) -> int:
     using the classic SingleR marker detection algorithm.
 
     Args:
-        num_labels: Number of labels.
+        num_labels:
+            Number of labels.
 
     Returns:
-        int: Number of markers.
+        Number of markers.
+
+    Examples:
+        >>> import singler
+        >>> singler.number_of_classic_markers(15)
     """
     return lib.number_of_classic_markers(num_labels)

@@ -73,7 +73,37 @@ def classify_integrated(
         each reference, as a nested ``BiocFrame``; and the ``delta`` from the
         best to the second-best reference. Each row corresponds to a column of
         ``test_data``.
+
+    Examples:
+        >>> # Mocking up data.
+        >>> import singler
+        >>> ref = singler.mock_reference_data(num_replicates=8)
+        >>> ref1 = ref[:,[True, False] * int(ref.shape[1]/2)]
+        >>> ref2 = ref[:,[False, True] * int(ref.shape[1]/2)]
+        >>> 
+        >>> cd2 = ref2.get_column_data()
+        >>> label2 = [l.lower() for l in cd2["label"]] # converting to lower-case for some variety.
+        >>> cd2.set_column("label", label2, in_place=True)
+        >>> ref2.set_column_data(cd2, in_place=True)
+        >>> 
+        >>> import scranpy
+        >>> ref1 = scranpy.normalize_rna_counts_se(ref1)
+        >>> ref2 = scranpy.normalize_rna_counts_se(ref2)
+        >>> 
+        >>> # Performing classification within each reference.
+        >>> test = singler.mock_test_data(ref)
+        >>> 
+        >>> built1 = singler.train_single(ref1, ref1.get_column_data()["label"], ref1.get_row_names())
+        >>> res1 = singler.classify_single(test, built1)
+        >>> built2 = singler.train_single(ref2, ref2.get_column_data()["label"], ref2.get_row_names())
+        >>> res2 = singler.classify_single(test, built2)
+        >>> 
+        >>> # Combining results across references.
+        >>> in_built = singler.train_integrated(test.get_row_names(), [built1, built2])
+        >>> in_res = singler.classify_integrated(test, [res1, res2], in_built)
+        >>> print(in_res)
     """
+
     if isinstance(test_data, summarizedexperiment.SummarizedExperiment):
         test_data = test_data.assay(assay_type)
 

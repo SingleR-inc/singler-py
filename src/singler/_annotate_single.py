@@ -90,7 +90,24 @@ def annotate_single(
     Returns:
         A :py:class:`~biocframe.BiocFrame.BiocFrame` of labelling results, see
         :py:func:`~singler.classify_single` for details.
+
+    Examples:
+        >>> # Mocking up data with log-normalized expression values:
+        >>> import singler
+        >>> ref = singler.mock_reference_data()
+        >>> test = singler.mock_test_data(ref)
+        >>> 
+        >>> import scranpy
+        >>> ref = scranpy.normalize_rna_counts_se(ref)
+        >>> test = scranpy.normalize_rna_counts_se(test)
+        >>> 
+        >>> # Running the classification:
+        >>> pred = singler.annotate_single(test, ref, ref_labels=ref.get_column_data()["label"])
+        >>> print(pred)
+        >>> import collections
+        >>> print(collections.Counter(zip(pred["best"], test.get_column_data()["label"])))
     """
+
     if isinstance(ref_labels, str):
         warnings.warn(
             "setting 'ref_labels' to a column name of the column data is deprecated",

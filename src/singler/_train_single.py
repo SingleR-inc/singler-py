@@ -187,7 +187,25 @@ def train_single(
     Returns:
         The pre-built reference, ready for use in downstream methods like
         :py:meth:`~singler.classify_single`.
+
+    Examples:
+        >>> # Mocking up data.
+        >>> import singler
+        >>> ref = singler.mock_reference_data(num_replicates=8)
+        >>> test = singler.mock_test_data(ref)
+        >>> 
+        >>> import scranpy
+        >>> ref = scranpy.normalize_rna_counts_se(ref)
+        >>> 
+        >>> # Training a classifier.
+        >>> built = singler.train_single(ref, ref.get_column_data()["label"], ref.get_row_names())
+        >>> built.num_labels
+        >>> built.num_markers
+        >>> built.labels
+        >>> built.markers["A"]["B"] # markers for A over B.
+        >>> len(built.marker_subset()) 
     """
+
     if isinstance(ref_labels, str):
         warnings.warn(
             "setting 'ref_labels' to a column name of the column data is deprecated",

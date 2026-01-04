@@ -39,6 +39,11 @@ jobs:
           path: ${{ env.CACHEDIR }}
           key: gypsum-${{ matrix.os }}-${{ matrix.python-version }}
 
+      - name: Extract examples from docstrings
+        run: |
+          echo "def test_docstrings():" > tests/test_docstrings.py
+          cat src/singler/*.py | sed "s/^/#/" | sed "s/^# *>>> /    /" >> tests/test_docstrings.py
+
       - name: Test with tox
         run: |
           pip install tox

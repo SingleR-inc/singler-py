@@ -71,7 +71,24 @@ def aggregate_reference(
     Returns:
         A :py:class:`~summarizedexperiment.SummarizedExperiment.SummarizedExperiment` containing the aggregated values in its first assay.
         The label for each aggregated profile is stored in the column data.
+
+    Examples:
+        >>> # Mock up some log-expression data for a reference dataset.
+        >>> import singler
+        >>> ref = singler.mock_reference_data(num_replicates=50)
+        >>> labels = ref.get_column_data()["label"]
+        >>> import scranpy
+        >>> ref = scranpy.normalize_rna_counts_se(ref)
+        >>> 
+        >>> # Aggregation at different resolutions:
+        >>> aggr0_5 = singler.aggregate_reference(ref, labels, ref.get_row_names(), power=0.5)
+        >>> print(aggr0_5)
+        >>> aggr0 = singler.aggregate_reference(ref, labels, ref.get_row_names(), power=0) # i.e., centroids only. 
+        >>> print(aggr0)
+        >>> aggr1 = singler.aggregate_reference(ref, labels, ref.get_row_names(), power=1) # i.e., no aggregation.
+        >>> print(aggr1)
     """
+
     ref_data, ref_features = _clean_matrix(
         ref_data,
         ref_features,

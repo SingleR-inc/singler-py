@@ -54,7 +54,33 @@ def train_integrated(
     Returns:
         Integrated references for classification with
         :py:meth:`~singler.classify_integrated`.
+
+    Examples:
+        >>> # Mocking up data.
+        >>> import singler
+        >>> ref = singler.mock_reference_data(num_replicates=8)
+        >>> ref1 = ref[:,[True, False] * int(ref.shape[1]/2)]
+        >>> ref2 = ref[:,[False, True] * int(ref.shape[1]/2)]
+        >>> 
+        >>> cd2 = ref2.get_column_data()
+        >>> label2 = [l.lower() for l in cd2["label"]] # converting to lower case for some variety.
+        >>> cd2.set_column("label", label2, in_place=True)
+        >>> ref2.set_column_data(cd2, in_place=True)
+        >>> 
+        >>> import scranpy
+        >>> ref1 = scranpy.normalize_rna_counts_se(ref1)
+        >>> ref2 = scranpy.normalize_rna_counts_se(ref2)
+        >>> 
+        >>> # Building a classifier for each reference.
+        >>> test = singler.mock_test_data(ref)
+        >>> built1 = singler.train_single(ref1, ref1.get_column_data()["label"], ref1.get_row_names())
+        >>> built2 = singler.train_single(ref2, ref2.get_column_data()["label"], ref2.get_row_names())
+        >>> 
+        >>> # Creating an integrated classifier across references.
+        >>> in_built = singler.train_integrated(test.get_row_names(), [built1, built2])
+        >>> in_built.reference_labels
     """
+
     # Checking the genes.
     if warn_lost:
         all_refnames = [x.features for x in ref_prebuilt]

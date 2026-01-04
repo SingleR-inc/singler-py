@@ -24,6 +24,7 @@ from ._train_integrated import train_integrated, TrainedIntegratedReferences
 from ._classify_integrated import classify_integrated
 from ._annotate_integrated import annotate_integrated
 from ._aggregate_reference import aggregate_reference
+from ._mock_data import mock_reference_data, mock_test_data
 
 
 __all__ = []

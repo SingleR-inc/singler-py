@@ -56,3 +56,4 @@ MANIFEST
 _cache
 src/singler/_lib_singler.py
 docs/html
+tests/test_docstrings.py

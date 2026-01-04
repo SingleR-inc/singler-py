@@ -110,7 +110,36 @@ def annotate_integrated(
         and the second element contains integrated results across references
         (i.e., a BiocFrame from
         :py:func:`~singler.classify_integrated`).
+
+    Examples:
+        >>> # Mocking up data.
+        >>> import singler
+        >>> ref = singler.mock_reference_data(num_replicates=8)
+        >>> ref1 = ref[:,[True, False] * int(ref.shape[1]/2)]
+        >>> ref2 = ref[:,[False, True] * int(ref.shape[1]/2)]
+        >>> 
+        >>> cd2 = ref2.get_column_data()
+        >>> label2 = [l.lower() for l in cd2["label"]] # converting to lower-case for some variety.
+        >>> cd2.set_column("label", label2, in_place=True)
+        >>> ref2.set_column_data(cd2, in_place=True)
+        >>> 
+        >>> import scranpy
+        >>> ref1 = scranpy.normalize_rna_counts_se(ref1)
+        >>> ref2 = scranpy.normalize_rna_counts_se(ref2)
+        >>> 
+        >>> # Classifying within and across references.
+        >>> test = singler.mock_test_data(ref)
+        >>> per_ref, combined = singler.annotate_integrated(
+        >>>     test,
+        >>>     [ref1, ref2],
+        >>>     [ref1.get_column_data()["label"], ref2.get_column_data()["label"]]
+        >>> ) 
+        >>> 
+        >>> print(per_ref[0]) # i.e., classification against ref1
+        >>> print(per_ref[1]) # i.e., classification against ref2
+        >>> print(combined) # combined classification results
     """
+
     nrefs = len(ref_data)
     if nrefs != len(ref_labels):
         raise ValueError("'ref_data' and 'ref_labels' must be the same length")

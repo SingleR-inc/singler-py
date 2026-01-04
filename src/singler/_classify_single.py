@@ -62,7 +62,24 @@ def classify_single(
         to a column of ``test``. The metadata contains ``markers``, a list of
         the markers from each pairwise comparison between labels; and ``used``,
         a list containing the union of markers from all comparisons.
+
+    Examples:
+        >>> # Mocking up data.
+        >>> import singler
+        >>> ref = singler.mock_reference_data(num_replicates=8)
+        >>> test = singler.mock_test_data(ref)
+        >>> 
+        >>> import scranpy
+        >>> ref = scranpy.normalize_rna_counts_se(ref)
+        >>> 
+        >>> # Training and applying a classifier.
+        >>> built = singler.train_single(ref, ref.get_column_data()["label"], ref.get_row_names())
+        >>> res = singler.classify_single(test, built)
+        >>> print(res)
+        >>> import collections
+        >>> print(collections.Counter(zip(res["best"], test.get_column_data()["label"])))
     """
+
     if isinstance(test_data, summarizedexperiment.SummarizedExperiment):
         test_data = test_data.assay(assay_type)
 
