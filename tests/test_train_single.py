@@ -92,16 +92,17 @@ def test_train_single_scranpy():
 
     import scranpy
     effects = scranpy.score_markers(ref, labels, all_pairwise=True)
+    groups = effects["group_ids"]
 
     def verify(ref_markers, effect_sizes, hard_limit, extra):
         all_labels = sorted(list(ref_markers.keys()))
-        assert all_labels == sorted(effects.groups)
+        assert all_labels == sorted(groups)
 
-        for g1, group1 in enumerate(effects.groups):
+        for g1, group1 in enumerate(groups):
             current_markers = ref_markers[group1]
             assert all_labels == sorted(list(current_markers.keys()))
 
-            for g2, group2 in enumerate(effects.groups):
+            for g2, group2 in enumerate(groups):
                 if g1 == g2:
                     assert len(current_markers[group2]) == 0
                 else:
@@ -118,7 +119,7 @@ def test_train_single_scranpy():
                         extra(group1, group2, my_markers)
 
     built = singler.train_single(ref, labels, features, marker_method="auc")
-    verify(built.markers, effects.auc, 0.5, extra=None)
+    verify(built.markers, effects["auc"], 0.5, extra=None)
 
     built = singler.train_single(ref, labels, features, marker_method="cohens_d")
     def extra_cohen(n, n2, my_markers):
@@ -127,7 +128,7 @@ def test_train_single_scranpy():
         left = markerref[:,[n == l for l in labels]].mean(axis=1)
         right = markerref[:,[n2 == l for l in labels]].mean(axis=1)
         assert (left > right).all()
-    verify(built.markers, effects.cohens_d, 0, extra=extra_cohen)
+    verify(built.markers, effects["cohens_d"], 0, extra=extra_cohen)
 
     built = singler.train_single(ref, labels, features, marker_method="cohens_d", num_de=10000)
     def extra_cohen(n, n2, my_markers):
@@ -136,7 +137,7 @@ def test_train_single_scranpy():
         left = markerref[:,[n == l for l in labels]].mean(axis=1)
         right = markerref[:,[n2 == l for l in labels]].mean(axis=1)
         assert (left > right).all()
-    verify(built.markers, effects.cohens_d, 0, extra=extra_cohen)
+    verify(built.markers, effects["cohens_d"], 0, extra=extra_cohen)
 
     # Responds to threshold specification.
     thresh_effects = scranpy.score_markers(ref, labels, threshold=1, all_pairwise=True)
@@ -145,7 +146,7 @@ def test_train_single_scranpy():
         left = markerref[:,[n == l for l in labels]].mean(axis=1)
         right = markerref[:,[n2 == l for l in labels]].mean(axis=1)
         assert (left > right + 1).all()
-    verify(built.markers, effects.cohens_d, 0, extra=extra_cohen)
+    verify(built.markers, effects["cohens_d"], 0, extra=extra_cohen)
 
 
 def test_train_single_aggregate():

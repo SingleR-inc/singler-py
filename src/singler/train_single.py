@@ -316,15 +316,16 @@ def _identify_genes(ref_data, ref_features, ref_labels, unique_labels, markers, 
                 compute_cohens_d=compute_cohens_d,
                 **marker_args
             )
-            pairwise = getattr(stats, effect_size)
+            pairwise = stats[effect_size]
+            groups = stats["group_ids"]
 
             if num_de is None:
                 num_de = 10
 
             markers = {}
-            for g1, group1 in enumerate(stats.groups):
+            for g1, group1 in enumerate(groups):
                 group_markers = {}
-                for g2, group2 in enumerate(stats.groups):
+                for g2, group2 in enumerate(groups):
                     if g1 == g2:
                         group_markers[group2] = biocutils.StringList()
                         continue

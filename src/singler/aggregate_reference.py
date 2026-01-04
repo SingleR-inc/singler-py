@@ -107,17 +107,17 @@ def aggregate_reference(
             # Doing a mini-analysis here: PCA on HVGs followed by k-means.
             import scranpy
             stats = scranpy.model_gene_variances(subcurrent, num_threads=num_threads)
-            keep = scranpy.choose_highly_variable_genes(stats.residual, top=num_top)
+            keep = scranpy.choose_highly_variable_genes(stats["statistics"]["residual"], top=num_top)
             subcurrent = subcurrent[keep,:]
 
             if rank <= min(subcurrent.shape)-1:
-                pcs = scranpy.run_pca(subcurrent, number=rank, num_threads=num_threads).components
+                pcs = scranpy.run_pca(subcurrent, number=rank, num_threads=num_threads)["components"]
             else:
                 pcs = subcurrent
 
             clustered = scranpy.cluster_kmeans(pcs, k=cur_num_centers, num_threads=num_threads)
-            agg = scranpy.aggregate_across_cells(current, [clustered.clusters], num_threads=num_threads)
-            output = agg.sum / agg.counts
+            agg = scranpy.aggregate_across_cells(current, [clustered["clusters"]], num_threads=num_threads)
+            output = agg["sum"] / agg["counts"]
 
         output_vals.append(output)
         output_labels += [lab] * output.shape[1]
