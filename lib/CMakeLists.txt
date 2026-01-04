@@ -27,6 +27,6 @@ set_property(TARGET singler PROPERTY CXX_STANDARD 17)
 target_link_libraries(singler PRIVATE pybind11::pybind11)
 
 set_target_properties(singler PROPERTIES
-    OUTPUT_NAME lib_singler
+    OUTPUT_NAME _lib_singler
     PREFIX ""
 )

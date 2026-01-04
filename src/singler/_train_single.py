@@ -7,15 +7,15 @@ import mattress
 import delayedarray
 import warnings
 
-from . import lib_singler as lib
+from . import _lib_singler as lib
 from ._utils import _clean_matrix, _restrict_features, _stable_intersect
-from .get_classic_markers import get_classic_markers
-from .aggregate_reference import aggregate_reference
+from ._get_classic_markers import get_classic_markers
+from ._aggregate_reference import aggregate_reference
 
 
 class TrainedSingleReference:
     """A prebuilt reference object, typically created by
-    :py:meth:`~singler.train_single.train_single`. This is intended for
+    :py:meth:`~singler.train_single`. This is intended for
     advanced users only and should not be serialized.
     """
 
@@ -156,26 +156,26 @@ def train_single(
 
         marker_method:
             Method to identify markers from each pairwise comparisons between labels in ``ref_data``.
-            If ``classic``, we call :py:func:`~singler.get_classic_markers.get_classic_markers`.
-            If ``auc`` or ``cohens_d``, we call :py:func:`~scranpy.score_markers.score_markers`.
+            If ``classic``, we call :py:func:`~singler.get_classic_markers`.
+            If ``auc`` or ``cohens_d``, we call :py:func:`~scranpy.score_markers`.
             Only used if ``markers`` is not supplied.
 
         num_de:
             Number of differentially expressed genes to use as markers for each pairwise comparison between labels.
-            If ``None`` and ``marker_method = "classic"``, an appropriate number of genes is determined by :py:func:`~singler.get_classic_markers.get_classic_markers`.
+            If ``None`` and ``marker_method = "classic"``, an appropriate number of genes is determined by :py:func:`~singler.get_classic_markers`.
             Otherwise, it is set to 10.
             Only used if ``markers`` is not supplied.
 
         marker_args:
             Further arguments to pass to the chosen marker detection method.
-            If ``marker_method = "classic"``, this is :py:func:`~singler.get_classic_markers.get_classic_markers`, otherwise it is :py:func:`~scranpy.score_markers.score_markers`.
+            If ``marker_method = "classic"``, this is :py:func:`~singler.get_classic_markers`, otherwise it is :py:func:`~scranpy.score_markers`.
             Only used if ``markers`` is not supplied.
 
         aggregate:
-            Whether the reference dataset should be aggregated to pseudo-bulk samples for speed, see :py:func:`~singler.aggregate_reference.aggregate_reference` for details.
+            Whether the reference dataset should be aggregated to pseudo-bulk samples for speed, see :py:func:`~singler.aggregate_reference` for details.
 
         aggregate_args:
-            Further arguments to pass to :py:func:`~singler.aggregate_reference.aggregate_reference` when ``aggregate = True``.
+            Further arguments to pass to :py:func:`~singler.aggregate_reference` when ``aggregate = True``.
 
         nn_parameters:
             Algorithm for constructing the neighbor search index, used to
@@ -186,7 +186,7 @@ def train_single(
 
     Returns:
         The pre-built reference, ready for use in downstream methods like
-        :py:meth:`~singler.classify_single_reference.classify_single`.
+        :py:meth:`~singler.classify_single`.
     """
     if isinstance(ref_labels, str):
         warnings.warn(

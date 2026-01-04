@@ -4,8 +4,8 @@ import biocframe
 import mattress
 import summarizedexperiment
 
-from . import lib_singler as lib
-from .train_single import TrainedSingleReference 
+from . import _lib_singler as lib
+from ._train_single import TrainedSingleReference 
 
 
 def classify_single(
@@ -33,7 +33,7 @@ def classify_single(
 
         ref_prebuilt:
             A pre-built reference created with
-            :py:func:`~singler.train_single.train_single`.
+            :py:func:`~singler.train_single`.
 
         assay_type:
             Assay containing the expression matrix, if ``test_data`` is a

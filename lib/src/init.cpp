@@ -7,7 +7,7 @@ void init_classify_single(pybind11::module&);
 void init_train_integrated(pybind11::module&);
 void init_classify_integrated(pybind11::module&);
 
-PYBIND11_MODULE(lib_singler, m) {
+PYBIND11_MODULE(_lib_singler, m) {
     init_find_classic_markers(m);
     init_train_single(m);
     init_classify_single(m);

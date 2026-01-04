@@ -4,8 +4,8 @@ from typing import Any, Optional, Sequence, Union
 import biocframe
 import summarizedexperiment
 
-from .train_single import train_single 
-from .classify_single import classify_single
+from ._train_single import train_single 
+from ._classify_single import classify_single
 from ._utils import _clean_matrix, _restrict_features
 
 
@@ -41,7 +41,7 @@ def annotate_single(
             A matrix-like object representing the reference dataset, where rows
             are features and columns are samples. Entries should be expression values,
             usually log-transformed (see comments for the ``ref`` argument in
-            :py:func:`~singler.train_single.train_single`).
+            :py:func:`~singler.train_single`).
 
             Alternatively, a
             :py:class:`~summarizedexperiment.SummarizedExperiment.SummarizedExperiment`
@@ -78,18 +78,18 @@ def annotate_single(
 
         train_args:
             Further arguments to pass to
-            :py:func:`~singler.train_single.train_single`.
+            :py:func:`~singler.train_single`.
 
         classify_args:
             Further arguments to pass to
-            :py:func:`~singler.classify_single.classify_single`.
+            :py:func:`~singler.classify_single`.
 
         num_threads:
             Number of threads to use for the various steps.
 
     Returns:
         A :py:class:`~biocframe.BiocFrame.BiocFrame` of labelling results, see
-        :py:func:`~singler.classify_single.classify_single` for details.
+        :py:func:`~singler.classify_single` for details.
     """
     if isinstance(ref_labels, str):
         warnings.warn(

@@ -5,7 +5,7 @@ import mattress
 import numpy
 import biocutils
 
-from . import lib_singler as lib
+from . import _lib_singler as lib
 from ._utils import (
     _clean_matrix,
     _create_map,

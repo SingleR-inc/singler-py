@@ -24,7 +24,7 @@ jobs:
 
       - name: Build docs
         run: |
-          touch src/singler/lib_singler.py
+          touch src/singler/_lib_singler.py
           pip install tox
           tox -e docs
 

@@ -4,10 +4,10 @@ import biocframe
 import warnings
 
 from ._utils import _clean_matrix, _restrict_features
-from .train_single import train_single
-from .train_integrated import train_integrated
-from .classify_single import classify_single
-from .classify_integrated import classify_integrated
+from ._train_single import train_single
+from ._train_integrated import train_integrated
+from ._classify_single import classify_single
+from ._classify_integrated import classify_integrated
 
 
 def annotate_integrated(
@@ -46,7 +46,7 @@ def annotate_integrated(
             - A matrix-like object representing the reference dataset, where rows
               are features and columns are samples. Entries should be expression values,
               usually log-transformed (see comments for the ``ref_data`` argument in
-              :py:func:`~singler.train_single.train_single`).
+              :py:func:`~singler.train_single`).
             - A ``SummarizedExperiment`` object containing such a matrix in its assays.
 
         ref_labels:
@@ -86,19 +86,19 @@ def annotate_integrated(
 
         train_single_args:
             Further arguments to pass to
-            :py:func:`~singler.train_single.train_single`.
+            :py:func:`~singler.train_single`.
 
         classify_single_args:
             Further arguments to pass to
-            :py:func:`~singler.classify_single.classify_single`.
+            :py:func:`~singler.classify_single`.
 
         train_integrated_args:
             Further arguments to pass to
-            :py:func:`~singler.train_integrated.train_integrated`.
+            :py:func:`~singler.train_integrated`.
 
         classify_integrated_args:
             Further arguments to pass to
-            :py:func:`~singler.classify_integrated.classify_integrated`.
+            :py:func:`~singler.classify_integrated`.
 
         num_threads:
             Number of threads to use for the various steps.
@@ -106,10 +106,10 @@ def annotate_integrated(
     Returns:
         Tuple where the first element contains per-reference results (i.e. a
         list of BiocFrame outputs, roughly equivalent to running
-        :py:func:`~singler.annotate_single.annotate_single` on each reference)
+        :py:func:`~singler.annotate_single` on each reference)
         and the second element contains integrated results across references
         (i.e., a BiocFrame from
-        :py:func:`~singler.classify_integrated.classify_integrated`).
+        :py:func:`~singler.classify_integrated`).
     """
     nrefs = len(ref_data)
     if nrefs != len(ref_labels):

@@ -5,14 +5,14 @@ import biocutils
 import warnings
 import mattress
 
-from .train_single import TrainedSingleReference
-from . import lib_singler as lib
+from ._train_single import TrainedSingleReference
+from . import _lib_singler as lib
 from ._utils import _stable_union, _stable_intersect
 
 
 class TrainedIntegratedReferences:
     """Object containing integrated references, typically constructed by
-    :py:meth:`~singler.train_integrated.train_integrated`."""
+    :py:meth:`~singler.train_integrated`."""
 
     def __init__(self, ptr: int, ref_labels: list):
         self._ptr = ptr
@@ -42,7 +42,7 @@ def train_integrated(
 
         ref_prebuilt:
             List of prebuilt references, typically created by calling
-            :py:meth:`~singler.train_single.train_single`.
+            :py:meth:`~singler.train_single`.
 
         warn_lost:
             Whether to emit a warning if the markers for each reference are not
@@ -53,7 +53,7 @@ def train_integrated(
 
     Returns:
         Integrated references for classification with
-        :py:meth:`~singler.classify_integrated_references.classify_integrated`.
+        :py:meth:`~singler.classify_integrated`.
     """
     # Checking the genes.
     if warn_lost:

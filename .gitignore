@@ -54,3 +54,5 @@ MANIFEST
 .python-version
 
 _cache
+src/singler/_lib_singler.py
+docs/html

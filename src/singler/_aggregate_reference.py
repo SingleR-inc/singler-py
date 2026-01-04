@@ -22,7 +22,7 @@ def aggregate_reference(
     num_threads: int = 1
 ) -> summarizedexperiment.SummarizedExperiment:
     """Aggregate reference samples for a given label by using vector quantization to average their count profiles.
-    The idea is to reduce the size of single-cell reference datasets so as to reduce the computation time of :py:func:`~singler.train_single.train_single`.
+    The idea is to reduce the size of single-cell reference datasets so as to reduce the computation time of :py:func:`~singler.train_single`.
     We perform k-means clustering for all cells in each label and aggregate all cells within each k-means cluster.
     (More specifically, the clustering is done on the principal components generated from the highly variable genes to better capture the structure within each label.)
     This yields one or more profiles per label, reducing the number of separate observations while preserving some level of intra-label heterogeneity.
@@ -39,7 +39,7 @@ def aggregate_reference(
             Sequence of identifiers for each feature, i.e., row in ``ref_data``.
 
         num_centers:
-            Maximum number of aggregated profiles to produce for each label with :py:func:`~scranpy.cluster_kmeans.cluster_kmeans`.
+            Maximum number of aggregated profiles to produce for each label with :py:func:`~scranpy.cluster_kmeans`.
             If ``None``, a suitable number of profiles is automatically chosen. 
 
         power:
@@ -48,10 +48,10 @@ def aggregate_reference(
             Ignored if ``num_centers`` is not ``None``.
 
         num_top:
-            Number of highly variable genes to use for PCA prior to clustering, see :py:func:`~scranpy.choose_highly_variable_genes.choose_highly_variable_genes`.
+            Number of highly variable genes to use for PCA prior to clustering, see :py:func:`~scranpy.choose_highly_variable_genes`.
 
         rank:
-            Number of principal components to use during clustering, see :py:func:`~scranpy.run_pca.run_pca`.
+            Number of principal components to use during clustering, see :py:func:`~scranpy.run_pca`.
 
         assay_type:
             Integer or string specifying the assay of ``ref_data`` containing the relevant expression matrix,
