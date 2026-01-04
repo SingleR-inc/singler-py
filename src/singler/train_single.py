@@ -304,35 +304,34 @@ def _identify_genes(ref_data, ref_features, ref_labels, unique_labels, markers, 
                 effect_size = "cohens_d"
                 boundary = 0
 
+            if num_de is None:
+                num_de = 10
+
             import scranpy
             stats = scranpy.score_markers(
                 ref_data,
                 groups=ref_labels,
                 num_threads=num_threads,
-                all_pairwise=True,
+                all_pairwise=num_de,
                 compute_delta_detected=False,
                 compute_delta_mean=False,
                 compute_auc=compute_auc,
                 compute_cohens_d=compute_cohens_d,
                 **marker_args
             )
-            pairwise = stats[effect_size]
+            allbest = stats[effect_size]
             groups = stats["group_ids"]
-
-            if num_de is None:
-                num_de = 10
 
             markers = {}
             for g1, group1 in enumerate(groups):
                 group_markers = {}
+                g1best = allbest[g1]
                 for g2, group2 in enumerate(groups):
                     if g1 == g2:
                         group_markers[group2] = biocutils.StringList()
                         continue
-                    cureffects = pairwise[g2, g1, :] # remember, second dimension is the first group in the comparison.
-                    keep = biocutils.which(cureffects > boundary)
-                    o = numpy.argsort(-cureffects[keep], stable=True)
-                    group_markers[group2] = biocutils.StringList(biocutils.subset_sequence(ref_features, keep[o[:min(len(o), num_de)]]))
+                    g2best = g1best[g2]
+                    group_markers[group2] = biocutils.StringList(biocutils.subset_sequence(ref_features, g2best["index"]))
                 markers[group1] = group_markers 
 
             return markers
