@@ -1,0 +1,45 @@
+name: Test the library
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: ["ubuntu-latest", "macos-latest"]
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+
+    name: ${{matrix.os}}, Python ${{ matrix.python-version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
+
+      - name: Get latest CMake
+        uses: lukka/get-cmake@latest
+
+      - name: Detect gypsum cache
+        run: |
+          pip install gypsum-client
+          CACHEDIR=$(python -c "import gypsum_client; print(gypsum_client.cache_directory())")
+          echo "CACHEDIR=${CACHEDIR}" >> $GITHUB_ENV
+
+      - name: Cache gypsum assets
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.CACHEDIR }}
+          key: gypsum-${{ matrix.os }}-${{ matrix.python-version }}
+
+      - name: Test with tox
+        run: |
+          pip install tox
+          tox -vvv
