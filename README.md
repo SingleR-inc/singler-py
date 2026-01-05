@@ -11,80 +11,82 @@
 [![Project generated with PyScaffold](https://img.shields.io/badge/-PyScaffold-005CA0?logo=pyscaffold)](https://pyscaffold.org/)
 [![PyPI-Server](https://img.shields.io/pypi/v/singler.svg)](https://pypi.org/project/singler/)
 [![Monthly Downloads](https://static.pepy.tech/badge/singler/month)](https://pepy.tech/project/singler)
-![Unit tests](https://github.com/SingleR-inc/singler-py/actions/workflows/pypi-test.yml/badge.svg)
+![Unit tests](https://github.com/SingleR-inc/singler-py/actions/workflows/run-tests.yml/badge.svg)
 
 # Tinder for single-cell data
 
 ## Overview
 
-This package provides Python bindings to the [C++ implementation](https://github.com/SingleR-inc/singlepp) of the [SingleR method](https://github.com/SingleR-inc/SingleR),
+This package provides Python bindings to the [C++ implementation](https://github.com/SingleR-inc/singlepp) of the [**SingleR** method](https://github.com/SingleR-inc/SingleR),
 originally developed by [Aran et al. (2019)](https://www.nature.com/articles/s41590-018-0276-y).
 It is designed to annotate cell types by matching cells to known references based on their expression profiles.
 So kind of like Tinder, but for cells.
 
 ## Quick start
 
-Firstly, let's load in the famous PBMC 4k dataset from 10X Genomics:
+Firstly, let's load in the famous PBMC 4k dataset from 10X Genomics.
+Any [`SummarizedExperiment`](https://github.com/biocpy/SummarizedExperiment) can be used here.
 
 ```python
-import singlecellexperiment as sce
-data = sce.read_tenx_h5("pbmc4k-tenx.h5", realize_assays=True)
-mat = data.assay("counts")
-features = [str(x) for x in data.row_data["name"]]
+import singlecellexperiment
+sce = singlecellexperiment.read_tenx_h5("pbmc4k-tenx.h5", realize_assays=True)
+## class: SingleCellExperiment
+## dimensions: (33694, 4340)
+## assays(1): ['counts']
+## row_data columns(2): ['id', 'name']
+## row_names(0):
+## column_data columns(0): []
+## column_names(0):
+## main_experiment_name:
+## reduced_dims(0): []
+## alternative_experiments(0): []
+## row_pairs(0): []
+## column_pairs(0): []
+## metadata(0):
 ```
 
-or if you are coming from scverse ecosystem, i.e. `AnnData`, simply read the object as `SingleCellExperiment` and extract the matrix and the features.
-Read more on [SingleCellExperiment here](https://biocpy.github.io/tutorial/chapters/experiments/single_cell_experiment.html).
-
-
-```python
-import singlecellexperiment as sce
-
-sce_adata = sce.SingleCellExperiment.from_anndata(adata) 
-
-# or from a h5ad file
-sce_h5ad = sce.read_h5ad("tests/data/adata.h5ad")
-```
-
-Now, we fetch the Blueprint/ENCODE reference:
+Now, we fetch the Blueprint/ENCODE reference from the [**celldex**](https://pypi.org/project/celldex) package:
 
 ```python
 import celldex
-
 ref_data = celldex.fetch_reference("blueprint_encode", "2024-02-26", realize_assays=True)
+## class: SummarizedExperiment
+## dimensions: (19859, 259)
+## assays(1): ['logcounts']
+## row_data columns(0): []
+## row_names(19859): ['TSPAN6', 'TNMD', 'DPM1', ..., 'MIR522', 'LINC00550', 'GIMAP1-GIMAP5']
+## column_data columns(3): ['label.main', 'label.fine', 'label.ont']
+## column_names(259): ['mature.neutrophil', 'CD14.positive..CD16.negative.classical.monocyte', 'mature.neutrophil.1', ..., 'fibroblast.of.dermis.1', 'epithelial.cell.of.umbilical.artery.1', 'dermis.lymphatic.vessel.endothelial.cell.1']
+## metadata(0): 
 ```
 
-We can annotate each cell in `mat` with the reference:
+We annotate each cell in `sce` against the reference.
+This yields a data frame that contains all of the assignments and the scores for each label:
 
 ```python
 import singler
 results = singler.annotate_single(
-    test_data = mat,
-    test_features = features,
+    test_data = sce,
+    test_features = sce.get_row_data()["name"],
     ref_data = ref_data,
     ref_labels = ref_data.get_column_data().column("label.main"),
 )
-```
+print(results)
+## BiocFrame with 4340 rows and 3 columns
+##             best                                   scores               delta
+##           <list>                              <BiocFrame>  <ndarray[float64]>
+##    [0] Monocytes 0.2562168476981947:0.1254343439610945...  0.4378177347327983
+##    [1] Monocytes 0.2834593285584352:0.1350551446328624... 0.06708042619997218
+##    [2] Monocytes 0.27001789110872965:0.149733483922888... 0.29630159290612557
+##              ...                                      ...                 ...
+## [4337]  NK cells 0.22504679944584366:0.128832705528845... 0.09253938940916262
+## [4338]   B-cells 0.21466213533061748:0.143717963254983... 0.06727011631382662
+## [4339] Monocytes 0.2880677943712168:0.1327331541412791... 0.06576621116161818
+## ------
+## metadata(2): used markers
 
-The `results` data frame contains all of the assignments and the scores for each label:
-
-```python
-results.column("best")
-## ['Monocytes',
-##  'Monocytes',
-##  'Monocytes',
-##  'CD8+ T-cells',
-##  'CD4+ T-cells',
-##  'CD8+ T-cells',
-##  'Monocytes',
-##  'Monocytes',
-##  'B-cells',
-##  ...
-## ]
-
-results.column("scores").column("Macrophages")
-## array([0.35935275, 0.40833545, 0.37430726, ..., 0.32135929, 0.29728435,
-##        0.40208581])
+print(results["scores"]["Macrophages"])
+## [0.3553803  0.40346796 0.3680465  ... 0.32339334 0.29082273 0.39644526]
 ```
 
 ## Calling low-level functions
@@ -95,40 +97,42 @@ This allows us to re-use the same reference for multiple datasets without repeat
 
 ```python
 built = singler.train_single(
-    ref_data = ref_data.assay("logcounts"),
+    ref_data = ref_data,
     ref_labels = ref_data.get_column_data().column("label.main"),
     ref_features = ref_data.get_row_names(),
-    test_features = features,
+    test_features = sce.get_row_data()["name"]
 )
 ```
 
-And finally, we apply the pre-built reference to the test dataset to obtain our label assignments.
+Then, we apply the pre-built reference to the test dataset to obtain our label assignments.
 This can be repeated with different datasets that have the same features as `test_features=`.
 
 ```python
 output = singler.classify_single(mat, ref_prebuilt=built)
+print(output)
+## BiocFrame with 4340 rows and 3 columns
+##             best                                   scores               delta
+##           <list>                              <BiocFrame>  <ndarray[float64]>
+##    [0] Monocytes 0.2562168476981947:0.1254343439610945...  0.4378177347327983
+##    [1] Monocytes 0.2834593285584352:0.1350551446328624... 0.06708042619997218
+##    [2] Monocytes 0.27001789110872965:0.149733483922888... 0.29630159290612557
+##              ...                                      ...                 ...
+## [4337]  NK cells 0.22504679944584366:0.128832705528845... 0.09253938940916262
+## [4338]   B-cells 0.21466213533061748:0.143717963254983... 0.06727011631382662
+## [4339] Monocytes 0.2880677943712168:0.1327331541412791... 0.06576621116161818
+## ------
+## metadata(2): used markers
 ```
-
-    ## output
-    BiocFrame with 4340 rows and 3 columns
-                best                                   scores                delta
-            <list>                              <BiocFrame>   <ndarray[float64]>
-    [0] Monocytes 0.33265560369962943:0.407117403330602...  0.40706830113982534
-    [1] Monocytes 0.4078771641637374:0.4783396310685646...  0.07000418564184802
-    [2] Monocytes 0.3517036021728629:0.4076971245524348...  0.30997293412307647
-                ...                                      ...                  ...
-    [4337]  NK cells 0.3472631136865701:0.3937898240670208...  0.09640242155786138
-    [4338]   B-cells 0.26974632191999887:0.334862058137758... 0.061215905058676856
-    [4339] Monocytes 0.39390119034537324:0.468867490667427...  0.06678168346812047
 
 ## Integrating labels across references
 
-We can use annotations from multiple references through the `annotate_integrated()` function:
+We can use annotations from multiple references through the `annotate_integrated()` function.
+This annotates the test dataset against each reference individually to obtain the best per-reference label,
+and then it compares across references to find the best label from all references.
 
 ```python
 import singler
 import celldex
-
 blueprint_ref = celldex.fetch_reference("blueprint_encode", "2024-02-26", realize_assays=True)
 immune_cell_ref = celldex.fetch_reference("dice", "2024-02-26", realize_assays=True)
 
@@ -142,36 +146,21 @@ integrated_res = singler.annotate_integrated(
         blueprint_ref.get_column_data().column("label.main"),
         immune_cell_ref.get_column_data().column("label.main")
     ],
-    test_features = features,
-    num_threads = 6
+    test_features = features
 )
+
+print(integrated_res["integrated"])
+## BiocFrame with 4340 rows and 4 columns
+##        best_label    best_reference                                   scores               delta
+##            <list> <ndarray[uint32]>                              <BiocFrame>  <ndarray[float64]>
+##    [0]  Monocytes                 0 Monocytes:0.4601040318745395:Monocyte... 0.07172619402931646
+##    [1]  Monocytes                 0 Monocytes:0.5569436588644365:Monocyte... 0.10337145230321299
+##    [2]  Monocytes                 0 Monocytes:0.460675384672641:Monocytes... 0.06302300967458618
+##               ...               ...                                      ...                 ...
+## [4337]   NK cells                 0 NK cells:0.5639386082584756:NK cells:... 0.02453897370863012
+## [4338]    B-cells                 0 B-cells:0.49462921210156113:B cells:0...  0.0259893105975339
+## [4339]  Monocytes                 0 Monocytes:0.49997247809330014:Monocyt... 0.08744894116986357
 ```
 
-This annotates the test dataset against each reference individually to obtain the best per-reference label,
-and then it compares across references to find the best label from all references.
-
-```python
-integrated_res["integrated"].column("best_label")
-## ['Monocytes', 
-##  'Monocytes',
-##  'Monocytes',
-##  'CD8+ T-cells',
-##  'CD4+ T-cells',
-##  'CD8+ T-cells',
-##  'Monocytes',
-##  'Monocytes',
-##  ...
-## ]
-
-integrated_res["integrated"].column("best_reference")
-## [0,
-##  0, 
-##  0,
-##  0,
-##  0,
-##  0,
-##  0,
-##  0,
-##  ...
-## ]
-```
+The ``best_label`` columns contains the best label for each cell across all references,
+while the ``best_reference`` specifies the reference (in the same order as ``ref_data``) that contains the best label.

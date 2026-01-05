@@ -1,6 +1,16 @@
 # Changelog
 
-## Version 0.4.1 - 0.4.2
+## Version 0.5.0
+
+- Updates to work with the latest versions of dependencies, namely **mattress**, **knncolle**, **scrapper**.
+- `annotate_integrated()` now returns a named `NamedList` for easier interpretation.
+- Accept named references in `train_integrated()` and propagate this to the results of `classify_integrated()`.
+
+## Version 0.4.2
+
+- Remove **pandas** as a dependency.
+
+## Version 0.4.1
 
 - Added the `aggregate_reference()` function to aggregate references for speed.
   This is conveniently used via the `aggregate=` option in `train_single()`.
