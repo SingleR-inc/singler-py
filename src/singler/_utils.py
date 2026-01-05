@@ -1,4 +1,4 @@
-from typing import Sequence, Tuple
+from typing import Sequence, Tuple, Union
 
 import biocutils
 import numpy
@@ -122,3 +122,11 @@ def _restrict_features(data, features, restrict_to):
         delayedarray.DelayedArray(data)[keep, :],
         biocutils.subset_sequence(features, keep)
     )
+
+
+def _to_NamedList(x: Union[dict, Sequence, biocutils.NamedList]) -> biocutils.NamedList:
+    if isinstance(x, biocutils.NamedList):
+        return x
+    if isinstance(x, dict):
+        return biocutils.NamedList.from_dict(x)
+    return biocutils.NamedList.from_list(x)

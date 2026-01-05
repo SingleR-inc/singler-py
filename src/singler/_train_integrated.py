@@ -7,7 +7,7 @@ import mattress
 
 from ._train_single import TrainedSingleReference
 from . import _lib_singler as lib
-from ._utils import _stable_union, _stable_intersect
+from ._utils import _stable_union, _stable_intersect, _to_NamedList
 
 
 class TrainedIntegratedReferences:
@@ -16,9 +16,10 @@ class TrainedIntegratedReferences:
     This is intended for advanced users only and should not be serialized.
     """
 
-    def __init__(self, ptr: int, ref_labels: list):
+    def __init__(self, ptr: int, ref_labels: list, ref_names: Optional[biocutils.Names]):
         self._ptr = ptr
         self._labels = ref_labels
+        self._names = ref_names
 
     @property
     def reference_labels(self) -> list:
@@ -27,10 +28,17 @@ class TrainedIntegratedReferences:
         """
         return self._labels
 
+    @property
+    def reference_names(self) -> Optional[biocutils.Names]:
+        """
+        Names of the references, or ``None`` if they were unnamed.
+        """
+        return self._names
+
 
 def train_integrated(
     test_features: Sequence,
-    ref_prebuilt: list[TrainedSingleReference],
+    ref_prebuilt: Union[dict, Sequence, biocutils.NamedList],
     warn_lost: bool = True,
     num_threads: int = 1,
 ) -> TrainedIntegratedReferences:
@@ -75,9 +83,12 @@ def train_integrated(
         >>> built2 = singler.train_single(ref2, ref2.get_column_data()["label"], ref2.get_row_names())
         >>> 
         >>> # Creating an integrated classifier across references.
-        >>> in_built = singler.train_integrated(test.get_row_names(), [built1, built2])
+        >>> in_built = singler.train_integrated(test.get_row_names(), {"first": built1, "second": built2})
         >>> in_built.reference_labels
+        >>> in_built.reference_names
     """
+
+    ref_prebuilt = _to_NamedList(ref_prebuilt)
 
     # Checking the genes.
     if warn_lost:
@@ -110,4 +121,5 @@ def train_integrated(
     return TrainedIntegratedReferences(
         ptr=ibuilt,
         ref_labels=[x.labels for x in ref_prebuilt],
+        ref_names=ref_prebuilt.get_names()
     )

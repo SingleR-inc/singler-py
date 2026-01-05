@@ -1,9 +1,10 @@
 from typing import Any, Optional, Sequence, Tuple, Union
 
+import biocutils
 import biocframe
 import warnings
 
-from ._utils import _clean_matrix, _restrict_features
+from ._utils import _clean_matrix, _restrict_features, _to_NamedList
 from ._train_single import train_single
 from ._train_integrated import train_integrated
 from ._classify_single import classify_single
@@ -12,10 +13,10 @@ from ._classify_integrated import classify_integrated
 
 def annotate_integrated(
     test_data: Any,
-    ref_data: Sequence,
-    ref_labels: list[Sequence],
+    ref_data: Union[dict, Sequence, biocutils.NamedList],
+    ref_labels: Union[dict, Sequence, biocutils.NamedList],
     test_features: Optional[Sequence] = None,
-    ref_features: Optional[list[Optional[Sequence]]] = None,
+    ref_features: Optional[Union[dict, Sequence, biocutils.NamedList]] = None,
     test_assay_type: Union[str, int] = 0,
     ref_assay_type: Union[str, int] = "logcounts",
     test_check_missing: bool = False,
@@ -44,9 +45,18 @@ def annotate_integrated(
               Entries should be expression values, usually log-transformed (see comments for the ``ref_data`` argument in :py:func:`~singler.train_single`).
             - A ``SummarizedExperiment`` object containing such a matrix in its assays.
 
+            Alternatively, a dictionary where each value is a matrix-like object or ``SummarizedExperiment`` and each key is the name of the reference.
+
+            Alternatively, a (possibly named) :py:class:`~biocutils.NamedList.NamedList` where each entry is a matrix-like object or ``SummarizedExperiment``.
+
         ref_labels:
             Sequence of the same length as ``ref_data``.
             The ``i``-th entry should be a sequence of length equal to the number of columns of ``ref_data[i]``, containing the label associated with each column.
+
+            Alternatively, a dictionary where each value is a sequence of column labels and each key is the name of the reference.
+
+            Alternatively, a :py:class:`~biocutils.NamedList.NamedList` where each entry is a sequence of column names.
+            If the ``NamedList`` is named, the names should be the same as those of ``ref_data``.
 
         test_features:
             Sequence of length equal to the number of rows in ``test_data``, containing the feature identifier for each row.
@@ -56,6 +66,11 @@ def annotate_integrated(
             Sequence of the same length as ``ref_data``.
             The ``i``-th entry should be a sequence of length equal to the number of rows of ``ref_data[i]``, containing the feature identifier associated with each row.
             Alternatively, the ``i``-th entry may be set to ``None`` to use the row names of the experiment as features.
+
+            Alternatively, a dictionary where each value is a sequence of feature names and each key is the name of the reference.
+
+            Alternatively, a :py:class:`~biocutils.NamedList.NamedList` where each entry is a sequence of feature names.
+            If the ``NamedList`` is named, the names should be the same as those of ``ref_data``.
 
             If ``None``, the row names are used for all references, assuming ``ref_data`` only contains ``SummarizedExperiment`` objects.
 
@@ -122,15 +137,24 @@ def annotate_integrated(
         >>> print(combined) # combined classification results
     """
 
+    ref_data = _to_NamedList(ref_data)
+    ref_labels = _to_NamedList(ref_labels)
+
     nrefs = len(ref_data)
-    if nrefs != len(ref_labels):
-        raise ValueError("'ref_data' and 'ref_labels' must be the same length")
     if ref_features is None:
         ref_features = [None] * nrefs
-    if nrefs != len(ref_features):
-        raise ValueError("'ref_data' and 'ref_features' must be the same length")
+    ref_features = _to_NamedList(ref_features)
+
     if nrefs != len(ref_labels):
         raise ValueError("'ref_data' and 'ref_labels' must be the same length")
+    if nrefs != len(ref_features):
+        raise ValueError("'ref_data' and 'ref_features' must be the same length")
+
+    ref_names = ref_data.get_names()
+    if ref_data.get_names() != ref_labels.get_names():
+        warnings.warn("'ref_labels' and 'ref_data' should have the same keys/names")
+    if ref_data.get_names() != ref_features.get_names():
+        warnings.warn("'ref_features' and 'ref_data' should have the same keys/names")
 
     test_data, test_features = _clean_matrix(
         test_data,

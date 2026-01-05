@@ -30,6 +30,18 @@ def test_annotate_integrated_basic():
     assert set(single_results[1].column("best")) == set(labels2)
     assert set(integrated_results.column("best_reference")) == set([0, 1])
 
+    # Works with names.
+    named_single_results, named_integrated_results = singler.annotate_integrated(
+        test,
+        test_features=test_features,
+        ref_data={ "FOO": ref1, "BAR": ref2 },
+        ref_labels={ "FOO": labels1, "BAR": labels2 },
+        ref_features={ "FOO": features1, "BAR": features2 },
+    )
+    assert named_integrated_results["best_label"] == integrated_results["best_label"]
+    assert (named_integrated_results["best_reference"] == integrated_results["best_reference"]).all()
+
+
 
 def test_annotate_integrated_sanity():
     numpy.random.seed(6969) # ensure we don't get surprised by different results.

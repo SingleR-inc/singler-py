@@ -1,5 +1,6 @@
 import singler
 import numpy
+import pytest
 
 
 def test_classify_integrated_basic():
@@ -60,6 +61,15 @@ def test_classify_integrated_basic():
     assert presults.column("best_label") == results.column("best_label")
     assert (presults.column("best_reference") == results.column("best_reference")).all()
     assert (presults.column("delta") == results.column("delta")).all()
+
+    # Warns on inconsistent names.
+    with pytest.warns(match="same keys/names"):
+        singler.classify_integrated(
+            test,
+            results={ "foo": results1, "bar": results2 },
+            integrated_prebuilt=integrated,
+            num_threads = 2
+        )
 
 
 def test_classify_integrated_sanity():
