@@ -21,7 +21,8 @@ def aggregate_reference(
     check_missing: bool = True,
     num_threads: int = 1
 ) -> summarizedexperiment.SummarizedExperiment:
-    """Aggregate reference samples for a given label by using vector quantization to average their count profiles.
+    """
+    Aggregate reference samples for a given label by using vector quantization to average their count profiles.
     The idea is to reduce the size of single-cell reference datasets so as to reduce the computation time of :py:func:`~singler.train_single`.
     We perform k-means clustering for all cells in each label and aggregate all cells within each k-means cluster.
     (More specifically, the clustering is done on the principal components generated from the highly variable genes to better capture the structure within each label.)

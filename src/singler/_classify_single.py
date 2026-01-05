@@ -17,36 +17,29 @@ def classify_single(
     fine_tune_threshold: float = 0.05,
     num_threads: int = 1,
 ) -> biocframe.BiocFrame:
-    """Classify a test dataset against a reference by assigning labels from the latter to each column of the former
-    using the SingleR algorithm.
+    """
+    Classify a test dataset against a reference by assigning labels from the latter to each column of the former using the SingleR algorithm.
 
     Args:
         test_data:
-            A matrix-like object where each row is a feature and each column
-            is a test sample (usually a single cell), containing expression values.
-            Normalized and transformed expression values are also acceptable as only
-            the ranking is used within this function.
+            A matrix-like object where each row is a feature and each column is a test sample (usually a single cell), containing expression values.
+            Each entry may be an expression value of any kind; only the ranking within each column is used by this function.
 
-            Alternatively, a
-            :py:class:`~summarizedexperiment.SummarizedExperiment.SummarizedExperiment`
-            containing such a matrix in one of its assays.
+            Alternatively, a :py:class:`~summarizedexperiment.SummarizedExperiment.SummarizedExperiment` containing such a matrix in one of its assays.
 
         ref_prebuilt:
-            A pre-built reference created with
-            :py:func:`~singler.train_single`.
+            A pre-built reference created with :py:func:`~singler.train_single`.
 
         assay_type:
-            Assay containing the expression matrix, if ``test_data`` is a
-            :py:class:`~summarizedexperiment.SummarizedExperiment.SummarizedExperiment`.
+            Assay containing the expression matrix, if ``test_data`` is a :py:class:`~summarizedexperiment.SummarizedExperiment.SummarizedExperiment`.
 
         quantile:
             Quantile of the correlation distribution for computing the score for each label.
-            Larger values increase sensitivity of matches at the expense of
-            similarity to the average behavior of each label.
+            Larger values increase sensitivity of matches at the expense of similarity to the average behavior of each label.
 
         use_fine_tune:
-            Whether fine-tuning should be performed. This improves accuracy for distinguishing
-            between similar labels but requires more computational work.
+            Whether fine-tuning should be performed.
+            This improves accuracy for distinguishing between similar labels but requires more computational work.
 
         fine_tune_threshold:
             Maximum difference from the maximum correlation to use in fine-tuning.
@@ -56,12 +49,15 @@ def classify_single(
             Number of threads to use during classification.
 
     Returns:
-        A :py:class:`~BiocFrame.BiocFrame.BiocFrame` containing the ``best``
-        label, the ``scores`` for each label as a nested ``BiocFrame``, and the
-        ``delta`` from the best to the second-best label. Each row corresponds
-        to a column of ``test``. The metadata contains ``markers``, a list of
-        the markers from each pairwise comparison between labels; and ``used``,
-        a list containing the union of markers from all comparisons.
+        A :py:class:`~BiocFrame.BiocFrame.BiocFrame` with one row per column of ``test_data``.
+        This contains the following columns:
+
+        - ``best``: a list containing the assigned label for each sample in ``test_data``. 
+        - ``scores``: a nested ``BiocFrame`` where each column corresponds to a reference label and contains the score for that label across all test samples.
+        - ``delta``: a double-precision NumPy array containing the difference in scores between the best and second-best label. 
+
+        The metadata contains ``markers``, a list of the markers from each pairwise comparison between labels;
+        and ``used``, a list containing the union of markers from all comparisons.
 
     Examples:
         >>> # Mocking up data.

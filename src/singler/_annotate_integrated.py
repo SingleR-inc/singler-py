@@ -26,90 +26,72 @@ def annotate_integrated(
     classify_integrated_args: dict = {},
     num_threads: int = 1,
 ) -> Tuple[list[biocframe.BiocFrame], biocframe.BiocFrame]:
-    """Annotate a single-cell expression dataset based on the correlation
-    of each cell to profiles in multiple labelled references, where the
-    annotation from each reference is then integrated across references.
+    """
+    Annotate a single-cell expression dataset based on the correlation of each cell to profiles in multiple labelled references.
+    The results from each reference are then combined across references.
 
     Args:
         test_data:
-            A matrix-like object representing the test dataset, where rows are
-            features and columns are samples (usually cells). Entries should be
-            expression values; only the ranking within each column is used.
+            A matrix-like object representing the test dataset, where rows are features and columns are samples (usually cells).
+            Entries may be expression values of any kind, only the ranking within each column is used.
 
-            Alternatively, a
-            :py:class:`~summarizedexperiment.SummarizedExperiment.SummarizedExperiment`
-            containing such a matrix in one of its assays.
+            Alternatively, a :py:class:`~summarizedexperiment.SummarizedExperiment.SummarizedExperiment` containing such a matrix in one of its assays.
 
         ref_data:
             Sequence consisting of one or more of the following:
 
-            - A matrix-like object representing the reference dataset, where rows
-              are features and columns are samples. Entries should be expression values,
-              usually log-transformed (see comments for the ``ref_data`` argument in
-              :py:func:`~singler.train_single`).
+            - A matrix-like object representing the reference dataset, where rows are features and columns are samples.
+              Entries should be expression values, usually log-transformed (see comments for the ``ref_data`` argument in :py:func:`~singler.train_single`).
             - A ``SummarizedExperiment`` object containing such a matrix in its assays.
 
         ref_labels:
-            Sequence of the same length as ``ref_data``. The ``i``-th entry
-            should be a sequence of length equal to the number of columns of
-            ``ref_data[i]``, containing the label associated with each column.
+            Sequence of the same length as ``ref_data``.
+            The ``i``-th entry should be a sequence of length equal to the number of columns of ``ref_data[i]``, containing the label associated with each column.
 
         test_features:
-            Sequence of length equal to the number of rows in ``test_data``,
-            containing the feature identifier for each row.  Alternatively
-            ``None``, to use the row names of the experiment as features.
+            Sequence of length equal to the number of rows in ``test_data``, containing the feature identifier for each row.
+            Alternatively ``None``, to use the row names of the experiment as features.
 
         ref_features:
-            Sequence of the same length as ``ref_data``. The ``i``-th entry
-            should be a sequence of length equal to the number of rows of
-            ``ref_data[i]``, containing the feature identifier associated with
-            each row. It can also be set to ``None`` to use the row names of
-            the experiment as features.
+            Sequence of the same length as ``ref_data``.
+            The ``i``-th entry should be a sequence of length equal to the number of rows of ``ref_data[i]``, containing the feature identifier associated with each row.
+            Alternatively, the ``i``-th entry may be set to ``None`` to use the row names of the experiment as features.
 
-            This can also be ``None`` to indicate that the row names should be
-            used for all references, assuming ``ref_data`` only contains
-            ``SummarizedExperiment`` objects.
+            If ``None``, the row names are used for all references, assuming ``ref_data`` only contains ``SummarizedExperiment`` objects.
 
         test_assay_type:
-            Assay of ``test_data`` containing the expression matrix, if ``test_data`` is a
-            :py:class:`~summarizedexperiment.SummarizedExperiment.SummarizedExperiment`.
+            Assay of ``test_data`` containing the expression matrix, if ``test_data`` is a :py:class:`~summarizedexperiment.SummarizedExperiment.SummarizedExperiment`.
 
         test_check_missing:
             Whether to check for and remove missing (i.e., NaN) values from the test dataset.
 
         ref_assay_type:
-            Assay containing the expression matrix for any entry of ``ref_data`` that is a
-            :py:class:`~summarizedexperiment.SummarizedExperiment.SummarizedExperiment`.
+            Assay containing the expression matrix for any entry of ``ref_data`` that is a :py:class:`~summarizedexperiment.SummarizedExperiment.SummarizedExperiment`.
 
         ref_check_missing:
             Whether to check for and remove missing (i.e., NaN) values from the reference datasets.
 
         train_single_args:
-            Further arguments to pass to
-            :py:func:`~singler.train_single`.
+            Further arguments to pass to :py:func:`~singler.train_single`.
 
         classify_single_args:
-            Further arguments to pass to
-            :py:func:`~singler.classify_single`.
+            Further arguments to pass to :py:func:`~singler.classify_single`.
 
         train_integrated_args:
-            Further arguments to pass to
-            :py:func:`~singler.train_integrated`.
+            Further arguments to pass to :py:func:`~singler.train_integrated`.
 
         classify_integrated_args:
-            Further arguments to pass to
-            :py:func:`~singler.classify_integrated`.
+            Further arguments to pass to :py:func:`~singler.classify_integrated`.
 
         num_threads:
             Number of threads to use for the various steps.
 
     Returns:
-        Tuple where the first element contains per-reference results (i.e. a
-        list of BiocFrame outputs, roughly equivalent to running
-        :py:func:`~singler.annotate_single` on each reference)
-        and the second element contains integrated results across references
-        (i.e., a BiocFrame from
-        :py:func:`~singler.classify_integrated`).
+        Tuple of the following elements.
+
+        - A list of :py:class:`~biocframe.BiocFrame.BiocFrame` objects, containing the per-reference classification results.
+          This is equivalent to running :py:func:`~singler.annotate_single` for ``test_data`` on each reference separately.
+        - A ``BiocFrame`` from :py:func:`~singler.classify_integrated`, containing the integrated results across references.
 
     Examples:
         >>> # Mocking up data.

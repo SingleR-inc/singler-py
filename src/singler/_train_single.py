@@ -14,9 +14,9 @@ from ._aggregate_reference import aggregate_reference
 
 
 class TrainedSingleReference:
-    """A prebuilt reference object, typically created by
-    :py:meth:`~singler.train_single`. This is intended for
-    advanced users only and should not be serialized.
+    """
+    A prebuilt reference object, typically created by :py:meth:`~singler.train_single`.
+    This is intended for advanced users only and should not be serialized.
     """
 
     def __init__(
@@ -38,8 +38,8 @@ class TrainedSingleReference:
     def num_markers(self) -> int:
         """
         Returns:
-            Number of markers to be used for classification. This is the
-            same as the size of the array from :py:meth:`~marker_subset`.
+            Number of markers to be used for classification.
+            This is the same as the size of the array from :py:meth:`~marker_subset`.
         """
         return lib.get_num_markers_from_single_reference(self._ptr)
 
@@ -52,31 +52,35 @@ class TrainedSingleReference:
 
     @property
     def features(self) -> list:
-        """The universe of features known to this reference."""
+        """
+        The universe of features known to this reference.
+        """
         return self._features
 
     @property
     def labels(self) -> Sequence:
-        """Unique labels in this reference."""
+        """
+        Unique labels in this reference.
+        """
         return self._labels
 
     @property
-    def markers(self) -> dict[Any, dict[Any, list]]:
-        """Markers for every pairwise comparison between labels."""
+    def markers(self) -> dict[Any, dict[Any, biocutils.StringList]]:
+        """
+        Markers for every pairwise comparison between labels.
+        """
         return self._markers
 
-    def marker_subset(self, indices_only: bool = False) -> Union[numpy.ndarray, list]:
+    def marker_subset(self, indices_only: bool = False) -> Union[numpy.ndarray, biocutils.StringList]:
         """
         Args:
             indices_only:
-                Whether to return the markers as indices
-                into :py:attr:`~features`, or as a list of feature identifiers.
+                Whether to return the markers as indices into :py:attr:`~features`, or as a list of feature identifiers.
 
         Returns:
             If ``indices_only = False``, a list of feature identifiers for the markers.
 
-            If ``indices_only = True``, a NumPy array containing the integer indices of
-            features in ``features`` that were chosen as markers.
+            If ``indices_only = True``, a NumPy array containing the integer indices of features in ``features`` that were chosen as markers.
         """
         buffer = lib.get_markers_from_single_reference(self._ptr)
         if indices_only:
@@ -109,20 +113,16 @@ def train_single(
     nn_parameters: Optional[knncolle.Parameters] = knncolle.VptreeParameters(),
     num_threads: int = 1,
 ) -> TrainedSingleReference:
-    """Build a single reference dataset in preparation for classification.
+    """
+    Build a single reference dataset in preparation for classification.
 
     Args:
         ref_data:
-            A matrix-like object where rows are features, columns are
-            reference profiles, and each entry is the expression value.
-            If ``markers`` is not provided, expression should be normalized
-            and log-transformed in preparation for marker prioritization via
-            differential expression analyses. Otherwise, any expression values
-            are acceptable as only the ranking within each column is used.
+            A matrix-like object where rows are features, columns are reference profiles, and each entry is the expression value.
+            If ``markers`` is not provided, expression should be normalized and log-transformed in preparation for marker prioritization via differential expression analyses.
+            Otherwise, any expression values are acceptable as only the ranking within each column is used.
 
-            Alternatively, a
-            :py:class:`~summarizedexperiment.SummarizedExperiment.SummarizedExperiment`
-            containing such a matrix in one of its assays.
+            Alternatively, a :py:class:`~summarizedexperiment.SummarizedExperiment.SummarizedExperiment` containing such a matrix in one of its assays.
 
         ref_labels:
             Sequence of labels for each reference profile, i.e., column in ``ref_data``.
@@ -134,25 +134,20 @@ def train_single(
             Sequence of identifiers for each feature in the test dataset.
 
         assay_type:
-            Assay containing the expression matrix,
-            if ``ref_data`` is a
-            :py:class:`~summarizedexperiment.SummarizedExperiment.SummarizedExperiment`.
+            Assay containing the expression matrix, if ``ref_data`` is a :py:class:`~summarizedexperiment.SummarizedExperiment.SummarizedExperiment`.
 
         check_missing:
-            Whether to check for and remove rows with missing (NaN) values
-            from ``ref_data``.
+            Whether to check for and remove rows with missing (NaN) values from ``ref_data``.
 
         restrict_to:
-            Subset of available features to restrict to. Only features in
-            ``restrict_to`` will be used in the reference building. If
-            ``None``, no restriction is performed.
+            Subset of available features to restrict to.
+            Only features in ``restrict_to`` will be used in the reference building.
+            If ``None``, no restriction is performed.
 
         markers:
-            Upregulated markers for each pairwise comparison between labels.
-            Specifically, ``markers[a][b]`` should be a sequence of features
-            that are upregulated in ``a`` compared to ``b``. All such features
-            should be present in ``features``, and all labels in ``labels``
-            should have keys in the inner and outer dictionaries.
+            Upregulated markers for each pairwise comparison between labels. 
+            Specifically, ``markers[a][b]`` should be a sequence of features that are upregulated in ``a`` compared to ``b``.
+            All such features should be present in ``features``, and all labels in ``labels`` should have keys in the inner and outer dictionaries.
 
         marker_method:
             Method to identify markers from each pairwise comparisons between labels in ``ref_data``.
@@ -178,15 +173,13 @@ def train_single(
             Further arguments to pass to :py:func:`~singler.aggregate_reference` when ``aggregate = True``.
 
         nn_parameters:
-            Algorithm for constructing the neighbor search index, used to
-            compute scores during classification.
+            Algorithm for constructing the neighbor search index, used to compute scores during classification.
 
         num_threads:
             Number of threads to use for reference building.
 
     Returns:
-        The pre-built reference, ready for use in downstream methods like
-        :py:meth:`~singler.classify_single`.
+        The pre-built reference, ready for use in downstream methods like :py:meth:`~singler.classify_single`.
 
     Examples:
         >>> # Mocking up data.

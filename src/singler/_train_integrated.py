@@ -11,8 +11,10 @@ from ._utils import _stable_union, _stable_intersect
 
 
 class TrainedIntegratedReferences:
-    """Object containing integrated references, typically constructed by
-    :py:meth:`~singler.train_integrated`."""
+    """
+    Integrated references, typically constructed by :py:meth:`~singler.train_integrated`.
+    This is intended for advanced users only and should not be serialized.
+    """
 
     def __init__(self, ptr: int, ref_labels: list):
         self._ptr = ptr
@@ -20,10 +22,8 @@ class TrainedIntegratedReferences:
 
     @property
     def reference_labels(self) -> list:
-        """List of lists containing the names of the labels for each reference.
-
-        Each entry corresponds to a reference in :py:attr:`~reference_names`,
-        if ``reference_names`` is not ``None``.
+        """
+        List of lists containing the names of the labels for each reference.
         """
         return self._labels
 
@@ -34,26 +34,24 @@ def train_integrated(
     warn_lost: bool = True,
     num_threads: int = 1,
 ) -> TrainedIntegratedReferences:
-    """Build a set of integrated references for classification of a test dataset.
+    """
+    Build a set of integrated references for classification of a test dataset.
 
     Arguments:
         test_features:
             Sequence of features for the test dataset.
 
         ref_prebuilt:
-            List of prebuilt references, typically created by calling
-            :py:meth:`~singler.train_single`.
+            List of prebuilt references, typically created by calling :py:meth:`~singler.train_single`.
 
         warn_lost:
-            Whether to emit a warning if the markers for each reference are not
-            all present in all references.
+            Whether to emit a warning if the markers for each reference are not all present in all references.
 
         num_threads:
             Number of threads.
 
     Returns:
-        Integrated references for classification with
-        :py:meth:`~singler.classify_integrated`.
+        An integrated reference object, for classification with :py:meth:`~singler.classify_integrated`.
 
     Examples:
         >>> # Mocking up data.
