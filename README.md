@@ -132,7 +132,7 @@ import celldex
 blueprint_ref = celldex.fetch_reference("blueprint_encode", "2024-02-26", realize_assays=True)
 immune_cell_ref = celldex.fetch_reference("dice", "2024-02-26", realize_assays=True)
 
-single_results, integrated = singler.annotate_integrated(
+integrated_res = singler.annotate_integrated(
     mat,
     ref_data = [
         blueprint_ref,
@@ -151,7 +151,7 @@ This annotates the test dataset against each reference individually to obtain th
 and then it compares across references to find the best label from all references.
 
 ```python
-integrated.column("best_label")
+integrated_res["integrated"].column("best_label")
 ## ['Monocytes', 
 ##  'Monocytes',
 ##  'Monocytes',
@@ -163,7 +163,7 @@ integrated.column("best_label")
 ##  ...
 ## ]
 
-integrated.column("best_reference")
+integrated_res["integrated"].column("best_reference")
 ## [0,
 ##  0, 
 ##  0,

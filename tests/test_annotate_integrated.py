@@ -17,13 +17,15 @@ def test_annotate_integrated_basic():
     test_features = [all_features[i] for i in range(0, 10000, 2)]
     test = numpy.random.rand(len(test_features), 50)
 
-    single_results, integrated_results = singler.annotate_integrated(
+    all_res = singler.annotate_integrated(
         test,
         test_features=test_features,
         ref_data=[ref1, ref2],
         ref_labels=[labels1, labels2],
         ref_features=[features1, features2],
     )
+    single_results = all_res["single"]
+    integrated_results = all_res["integrated"]
 
     assert len(single_results) == 2
     assert set(single_results[0].column("best")) == set(labels1)
@@ -31,16 +33,19 @@ def test_annotate_integrated_basic():
     assert set(integrated_results.column("best_reference")) == set([0, 1])
 
     # Works with names.
-    named_single_results, named_integrated_results = singler.annotate_integrated(
+    named_res = singler.annotate_integrated(
         test,
         test_features=test_features,
         ref_data={ "FOO": ref1, "BAR": ref2 },
         ref_labels={ "FOO": labels1, "BAR": labels2 },
         ref_features={ "FOO": features1, "BAR": features2 },
     )
+
+    named_single_results = named_res["single"]
+    named_integrated_results = named_res["integrated"]
     assert named_integrated_results["best_label"] == integrated_results["best_label"]
     assert (named_integrated_results["best_reference"] == integrated_results["best_reference"]).all()
-
+    assert named_single_results.get_names().as_list() == ["FOO", "BAR"]
 
 
 def test_annotate_integrated_sanity():
@@ -62,22 +67,26 @@ def test_annotate_integrated_sanity():
     test[0:100,0:20:2] = 0
     test[100:200,1:20:2] = 0
 
-    single_results, integrated_results = singler.annotate_integrated(
+    all_res = singler.annotate_integrated(
         test,
         test_features=all_features,
         ref_data=[ref1, ref2],
         ref_labels=[labels1, labels2],
         ref_features=[all_features, all_features],
     )
+
+    single_results = all_res["single"]
+    assert len(single_results) == 2
+    integrated_results = all_res["integrated"]
     assert integrated_results.column("best_label") == ["A", "B"] * 10
     assert list(integrated_results.column("best_reference")) == [0, 1] * 10
 
     # To mix it up a little, we're going to be taking every 2nd element of the
     # ref1 and every 3rd element of ref2, just to make sure that the slicing
-    # works as expected.
+    # works as expected when taking the intersection.
     rkeep1 = list(range(0, ref1.shape[0], 2))
     rkeep2 = list(range(0, ref2.shape[0], 3))
-    single_results2, integrated_results2 = singler.annotate_integrated(
+    all_res2 = singler.annotate_integrated(
         test,
         test_features=all_features,
         ref_data=[
@@ -90,5 +99,9 @@ def test_annotate_integrated_sanity():
         ],
         ref_labels=[labels1, labels2],
     )
+
+    single_results2 = all_res2["single"]
+    assert len(single_results2) == 2
+    integrated_results2 = all_res2["integrated"]
     assert list(integrated_results2.column("best_reference")) == [0, 1] * 10
     assert integrated_results2.column("best_label") == ["A", "B"] * 10

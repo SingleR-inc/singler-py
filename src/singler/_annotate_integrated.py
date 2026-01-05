@@ -26,7 +26,7 @@ def annotate_integrated(
     train_integrated_args: dict = {},
     classify_integrated_args: dict = {},
     num_threads: int = 1,
-) -> Tuple[list[biocframe.BiocFrame], biocframe.BiocFrame]:
+) -> biocutils.NamedList:
     """
     Annotate a single-cell expression dataset based on the correlation of each cell to profiles in multiple labelled references.
     The results from each reference are then combined across references.
@@ -102,11 +102,12 @@ def annotate_integrated(
             Number of threads to use for the various steps.
 
     Returns:
-        Tuple of the following elements.
+        A :py:class:`~biocutils.NamedList.NamedList` containing the following elements.
 
-        - A list of :py:class:`~biocframe.BiocFrame.BiocFrame` objects, containing the per-reference classification results.
-          This is equivalent to running :py:func:`~singler.annotate_single` for ``test_data`` on each reference separately.
-        - A ``BiocFrame`` from :py:func:`~singler.classify_integrated`, containing the integrated results across references.
+        - `"single"`: a ``NamedList`` of :py:class:`~biocframe.BiocFrame.BiocFrame` objects, containing the per-reference classification results.
+          Each entry is equivalent to running :py:func:`~singler.annotate_single` for ``test_data`` on the corresponding reference separately.
+          If ``ref_data`` was named, the ``NamedList`` will also be named.
+        - A :py:class:`~biocframe.BiocFrame.BiocFrame` from :py:func:`~singler.classify_integrated`, containing the integrated results across references.
 
     Examples:
         >>> # Mocking up data.
@@ -126,15 +127,15 @@ def annotate_integrated(
         >>> 
         >>> # Classifying within and across references.
         >>> test = singler.mock_test_data(ref)
-        >>> per_ref, combined = singler.annotate_integrated(
+        >>> full_res = singler.annotate_integrated(
         >>>     test,
         >>>     [ref1, ref2],
         >>>     [ref1.get_column_data()["label"], ref2.get_column_data()["label"]]
         >>> ) 
         >>> 
-        >>> print(per_ref[0]) # i.e., classification against ref1
-        >>> print(per_ref[1]) # i.e., classification against ref2
-        >>> print(combined) # combined classification results
+        >>> print(full_res["single"][0]) # i.e., classification against ref1
+        >>> print(full_res["single"][1]) # i.e., classification against ref2
+        >>> print(full_res["integrated"]) # combined classification results
     """
 
     ref_data = _to_NamedList(ref_data)
@@ -239,4 +240,7 @@ def annotate_integrated(
         num_threads=num_threads,
     )
 
-    return all_results, ires
+    return biocutils.NamedList.from_dict({
+        "single": biocutils.NamedList(all_results, ref_names), 
+        "integrated": ires
+    })
