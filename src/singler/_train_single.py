@@ -6,6 +6,7 @@ import knncolle
 import mattress
 import delayedarray
 import warnings
+import singlecellexperiment
 
 from . import _lib_singler as lib
 from ._utils import _clean_matrix, _restrict_features, _stable_intersect
@@ -107,6 +108,7 @@ def train_single(
     markers: Optional[dict[Any, dict[Any, Sequence]]] = None,
     marker_method: Literal["classic", "auc", "cohens_d"] = "classic",
     num_de: Optional[int] = None,
+    hint_sce: bool = True,
     marker_args: dict = {},
     aggregate: bool = False,
     aggregate_args: dict = {},
@@ -161,6 +163,10 @@ def train_single(
             Otherwise, it is set to 10.
             Only used if ``markers`` is not supplied.
 
+        hint_sce:
+            Whether to print a hint to change ``marker_method`` when ``ref_data`` is a :py:class:`~singlecellexperiment.SingleCellExperiment.SingleCellExperiment`.
+            It will also suggest setting ``aggregate = True`` for greater efficiency when ``ref_data`` contains 1000 cells or more.
+
         marker_args:
             Further arguments to pass to the chosen marker detection method.
             If ``marker_method = "classic"``, this is :py:func:`~singler.get_classic_markers`, otherwise it is :py:func:`~scranpy.score_markers`.
@@ -205,6 +211,21 @@ def train_single(
             category=DeprecationWarning
         )
         ref_labels = ref_data.get_column_data().column(ref_labels)
+
+    if isinstance(ref_data, singlecellexperiment.SingleCellExperiment) and hint_sce:
+        hints = []
+        what = "SingleCellExperiment"
+        if de_method == "classic":
+            hints.append("'marker_method = \"auc\"' or \"cohens_d\"")
+        if ref_data.shape[1] >= 1000 and not aggregate:
+            what = "large " + what
+            hints.append("'aggregate = TRUE' for speed")
+        if len(hints) > 0:
+            msg = "Detected a " + what + " as the reference dataset, consider setting " + " and ".join(hints) + " in train_single()."
+            msg += " If you know better, this hint can be disabled with 'hint.sce=FALSE'."
+            import textwrap
+            print('\n'.join(textwrap.wrap(msg, width=80)))
+            hint_sce = False # only need to print this message once.
 
     ref_data, ref_features = _clean_matrix(
         ref_data,
