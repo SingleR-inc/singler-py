@@ -6,6 +6,7 @@
 #include "singlepp/singlepp.hpp"
 #include "tatami/tatami.hpp"
 #include "knncolle/knncolle.hpp"
+#include "sanisizer/sanisizer.hpp"
 #include "pybind11/pybind11.h"
 
 #include <vector>
@@ -30,9 +31,8 @@ TrainedSingleIntersectPointer train_single(
     typedef std::shared_ptr<knncolle::Builder<knncolle_py::Index, knncolle_py::MatrixValue, knncolle_py::Distance> > BuilderPointer;
     opts.trainer = BuilderPointer(BuilderPointer{}, builder.get()); // make a no-op shared pointer.
 
-    auto NR = ref->nrow();
     auto NC = ref->ncol();
-    if (static_cast<mattress::MatrixIndex>(labels.size()) != NC) {
+    if (!sanisizer::is_equal(labels.size(), NC)) {
         throw std::runtime_error("length of 'labels' is equal to the number of columns of 'ref'");
     }
 

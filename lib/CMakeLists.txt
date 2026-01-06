@@ -25,6 +25,9 @@ target_include_directories(singler PRIVATE "${KNNCOLLE_INCLUDE_DIR}")
 set_property(TARGET singler PROPERTY CXX_STANDARD 17)
 
 target_link_libraries(singler PRIVATE pybind11::pybind11)
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    target_compile_options(singler PRIVATE -Wall -Wpedantic -Wextra)
+endif()
 
 set_target_properties(singler PROPERTIES
     OUTPUT_NAME _lib_singler

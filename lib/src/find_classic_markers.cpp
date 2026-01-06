@@ -4,6 +4,7 @@
 
 #include "singlepp/singlepp.hpp"
 #include "tatami/tatami.hpp"
+#include "sanisizer/sanisizer.hpp"
 #include "pybind11/pybind11.h"
 
 #include <vector>
@@ -12,7 +13,7 @@
 
 pybind11::list find_classic_markers(uint32_t num_labels, uint32_t num_genes, const pybind11::list& reference, const pybind11::list& labels, int de_n, int nthreads) {
     size_t num_ref = reference.size();
-    if (num_ref != static_cast<size_t>(labels.size())) {
+    if (!sanisizer::is_equal(num_ref, labels.size())) {
         throw std::runtime_error("'ref' and 'labels' should have the same length");
     }
 
@@ -24,13 +25,13 @@ pybind11::list find_classic_markers(uint32_t num_labels, uint32_t num_genes, con
     for (size_t r = 0; r < num_ref; ++r) {
         auto ptr = mattress::cast(reference[r].cast<uintptr_t>())->ptr.get();
         ref_ptrs.emplace_back(ptr);
-        if (ptr->nrow() != num_genes) {
+        if (!sanisizer::is_equal(ptr->nrow(), num_genes)) {
             throw std::runtime_error("each entry of 'ref' should have number of rows equal to 'ngenes'");
         }
 
         // No copy, so it's fine to create a pointer and discard the casted array.
         auto lab = labels[r].cast<pybind11::array>();
-        if (lab.size() != static_cast<size_t>(ptr->ncol())) {
+        if (!sanisizer::is_equal(lab.size(), ptr->ncol())) {
             throw std::runtime_error("number of columns in each 'ref' should equal the length of the corresponding entry of 'labels'");
         }
 
